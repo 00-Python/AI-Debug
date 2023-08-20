@@ -13,28 +13,38 @@ def get_debugging_suggestions(model, messages):
 
     return response.choices[0].message["content"].strip()
 
-def get_code_from_directory(directory):
+def get_code_from_directory_or_file(path):
     code_dict = {}
-    for filename in os.listdir(directory):
-        filepath = os.path.join(directory, filename)
-        if os.path.isfile(filepath):
-            with open(filepath, "r") as file:
-                code_dict[filename] = file.read()
+
+    if os.path.isfile(path):  # If path is a single file
+        filename = os.path.basename(path)
+        with open(path, "r") as file:
+            code_dict[filename] = file.read()
+    elif os.path.isdir(path):  # If path is a directory
+        for filename in os.listdir(path):
+            filepath = os.path.join(path, filename)
+            if os.path.isfile(filepath):
+                with open(filepath, "r") as file:
+                    code_dict[filename] = file.read()
+    else:
+        print("Invalid path provided.")
+
     return code_dict
+
 
 def main():
     parser = argparse.ArgumentParser(description="Code Debugger CLI")
     parser.add_argument("--model", type=str,  default="gpt-3.5-turbo-16k", help="Name of the OpenAI debugging model to use (default: 'gpt-3.5-turbo-16k')")
     parser.add_argument("--language", type=str, help="Programming language of the code")
-    parser.add_argument("--directory", type=str, help="Path to the directory containing code files")
+    parser.add_argument("--path", type=str, help="Path to the directory containing code files")
     parser.add_argument("--error", type=str, help="Description of the error or issue")
     args = parser.parse_args()
 
     # Get code content from the directory
-    code_dict = get_code_from_directory(args.directory)
+    code_dict = get_code_from_directory_or_file(args.path)
 
     if not code_dict:
-        print("No code files found in the directory.")
+        print("No code files found.")
         return
 
     # Prepare the messages for the AI chat

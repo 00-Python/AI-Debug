@@ -33,35 +33,35 @@ This script utilizes OpenAI's models to assist in debugging code by providing su
 Run the script using the following command:
 
 ```bash
-python main.py --language <programming_language> --directory <path_to_code_directory> --error "<error_description>"
+python main.py --language <programming_language> --path <path_to_code_directory or file> --error "<error_description>"
 ```
 
 Replace the placeholders with appropriate values:
 
 - `<programming_language>`: The programming language of the code you want to debug.
-- `<path_to_code_directory>`: The path to the directory containing your code files.
+- `<path_to_code_directory or file>`: The path to the directory containing your code files or path to the single file.
 - `<error_description>`: A description of the error or issue you are facing.
 
 Example:
 
 ```bash
-python main.py --language Python --directory /path/to/your/code/directory --error "Code is throwing an IndexError."
+python main.py --language Python --path /path/to/your/code/directory/or/file --error "Code is throwing an IndexError."
 ```
 
 ### Available Arguments
 
 - `--language`: The programming language of the code to be debugged.
-- `--directory`: Path to the directory containing code files.
+- `--path`: Path to the directory containing code files or path to single file.
 - `--error`: Description of the error or issue you're facing.
 - `--model`: Name of the OpenAI debugging model to use (default: 'gpt-3.5-turbo-16k').
 
 Example:
 
 ```bash
-python main.py --language Python --directory /path/to/code/directory --error "IndexError" --model "gpt-3.5-turbo-16k"
+python main.py --language Python --path /path/to/code/directory/or/single/file --error "IndexError" --model "gpt-3.5-turbo-16k"
 ```
 
-The script will analyze the code files in the specified directory and provide AI-powered suggestions to debug the issue.
+The script will analyze the code files in the specified directory or a single file and provide AI-powered suggestions to debug the issue.
 
 ## License
 
