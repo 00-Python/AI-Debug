@@ -43,9 +43,9 @@ def main():
         {"role": "user", "content": f"Debug the following {args.language} code:"}
     ]
     
-    # Add code content as assistant messages
+    # Add code content as assistant messages with filename and line information
     for filename, code_content in code_dict.items():
-        messages.append({"role": "assistant", "content": code_content})
+        messages.append({"role": "assistant", "content": f"File: {filename}\n\n{code_content}"})
 
     messages.append({"role": "user", "content": args.error})
 
