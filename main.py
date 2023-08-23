@@ -122,7 +122,7 @@ class CodeDebugger:
                 return
 
         messages = [
-            {"role": "system", "content": "You are a detailed code debugger assistant that doesn't miss a single error. You always point out where the error is and what is causing it. If you do not notice an error you tell the user."},
+            {"role": "system", "content": "You are a detailed code debugger assistant that doesn't miss a single error. You always point out where the error is and what is causing it."},
             {"role": "user", "content": f"Debug the following {args.language} code:"}
         ]
 
