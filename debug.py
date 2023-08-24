@@ -17,7 +17,7 @@ def main():
     parser.add_argument("-p", "--path", type=str,
                         help="Path to the directory containing code files")
     parser.add_argument("-e", "--error", type=str,
-                        help="Description of the error or issue")
+                        help="Specific error message or description of the error or issue")
     parser.add_argument(
         "--clear-cache", action='store_true', help="Clear the cache")
     args = parser.parse_args()
