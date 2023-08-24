@@ -8,7 +8,7 @@ Before generating a debugging suggestion for your code, the script first counts 
 
 The OpenAI API charges you based on these tokens.
 
-After the token count, the script estimates the cost of using the API for the current debugging task. This estimation accounts for the cost of both input tokens (tokens used to send your code and request to the API) and output tokens (tokens used by the API to generate the response).
+After the token count, the script estimates the cost of using the API for the current debugging task. This estimation accounts for the cost of both input tokens (tokens used to send your code and request to the API) and output tokens if output tokens limit is specified by the user (tokens used by the API to generate the response).
 
 You will be presented the cost estimation before the request is sent to the API for processing. This gives you the opportunity to review and minimize charges where necessary.
 
@@ -44,6 +44,33 @@ If the same error occurs in the same code, the script handles this efficiently b
    ```
 
 ## Usage
+Check the help menu:
+
+```bash
+python debug.py -h
+```
+
+Output:
+```bash
+usage: debug.py [-h] [-m MODEL] [-t TEMPERATURE] [-o MAX_OUTPUT_TOKENS] [-l LANGUAGE] [-p PATH] [-e ERROR] [--clear-cache]
+
+AI Code Debugger & Helper CLI
+
+options:
+  -h, --help            show this help message and exit
+  -m MODEL, --model MODEL
+                        Name of the OpenAI debugging model to use (default: 'gpt-3.5-turbo-16k' Others: 'gpt-4', 'gpt-3.5-turbo')
+  -t TEMPERATURE, --temperature TEMPERATURE
+                        Temperature of response (Default is 1, can be between 0 and 2)
+  -o MAX_OUTPUT_TOKENS, --max-output-tokens MAX_OUTPUT_TOKENS
+                        Maximum output tokens in response (Default: GPT-3.5 Turbo: 4096 tokens, GPT-3.5-Turbo 16k: 16,384 tokens, GPT-4: 8192 tokens, GPT-4 32K: 32768 tokens)
+  -l LANGUAGE, --language LANGUAGE
+                        Programming language of the code
+  -p PATH, --path PATH  Path to the directory containing code files
+  -e ERROR, --error ERROR
+                        Specific error message or description of the error or issue
+  --clear-cache         Clear the cache
+```
 
 Run the script using the following command:
 
