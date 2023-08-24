@@ -51,7 +51,7 @@ python debug.py -h
 ```
 
 Output:
-```bash
+```
 usage: debug.py [-h] [-m MODEL] [-t TEMPERATURE] [-o MAX_OUTPUT_TOKENS] [-l LANGUAGE] [-p PATH] [-e ERROR] [--clear-cache]
 
 AI Code Debugger & Helper CLI
