@@ -7,7 +7,7 @@ def main():
     parser = argparse.ArgumentParser(
         description="AI Code Debugger & Helper CLI")
     parser.add_argument("-m", "--model", type=str, default="gpt-3.5-turbo-16k",
-                        help="Name of the OpenAI debugging model to use (default: 'gpt-3.5-turbo-16k' Others: 'gpt-4', 'gpt-3.5-turbo')")
+                        help="Name of the OpenAI model to use (default: 'gpt-3.5-turbo-16k' Others: 'gpt-4', 'gpt-3.5-turbo')")
     parser.add_argument("-t", "--temperature", type=float, default=1,
                         help="Temperature of response (Default is 1, can be between 0 and 2)")
     parser.add_argument("-o", "--max-output-tokens", type=int, default=0,
