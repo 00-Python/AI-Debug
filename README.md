@@ -60,7 +60,7 @@ AI Code Debugger & Helper CLI
 options:
   -h, --help            show this help message and exit
   -m MODEL, --model MODEL
-                        Name of the OpenAI debugging model to use (default: 'gpt-3.5-turbo-16k' Others: 'gpt-4', 'gpt-3.5-turbo')
+                        Name of the OpenAI model to use (default: 'gpt-3.5-turbo-16k' Others: 'gpt-4', 'gpt-3.5-turbo')
   -t TEMPERATURE, --temperature TEMPERATURE
                         Temperature of response (Default is 1, can be between 0 and 2)
   -o MAX_OUTPUT_TOKENS, --max-output-tokens MAX_OUTPUT_TOKENS
