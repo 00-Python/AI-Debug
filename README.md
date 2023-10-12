@@ -2,18 +2,6 @@
 
 This script utilizes OpenAI's models to assist in debugging code by providing suggestions for identifying and fixing errors in your code.
 
-## Detailed Explanation
-
-Before generating a debugging suggestion for your code, the script first counts the number of tokens that would be used up with the current request. The number of tokens is directly related to how many bytes of data you're sending and receiving from the API.
-
-The OpenAI API charges you based on these tokens.
-
-After the token count, the script estimates the cost of using the API for the current debugging task. This estimation accounts for the cost of both input tokens (tokens used to send your code and request to the API) and output tokens if output tokens limit is specified by the user (tokens used by the API to generate the response).
-
-You will be presented the cost estimation before the request is sent to the API for processing. This gives you the opportunity to review and minimize charges where necessary.
-
-If the same error occurs in the same code, the script handles this efficiently by using a caching system to store previously generated debugging suggestions. If a cache of the debugging suggestion for the current code and error exists, the script fetches it from the cache instead of sending another request to the API.
-
 ## TODO
 1. Add the abillity to choose specific files from dir or exclude specific files
 1. Map the file structure to make the AI aware of it 
@@ -102,6 +90,18 @@ If for any reasons, you wanted to clear the previously cached error suggestions,
 python debug.py --clear-cache
 ```
 This will clear all previously cached suggestions.
+
+## Detailed Explanation
+
+Before generating a debugging suggestion for your code, the script first counts the number of tokens that would be used up with the current request. The number of tokens is directly related to how many bytes of data you're sending and receiving from the API.
+
+The OpenAI API charges you based on these tokens.
+
+After the token count, the script estimates the cost of using the API for the current debugging task. This estimation accounts for the cost of both input tokens (tokens used to send your code and request to the API) and output tokens if output tokens limit is specified by the user (tokens used by the API to generate the response).
+
+You will be presented the cost estimation before the request is sent to the API for processing. This gives you the opportunity to review and minimize charges where necessary.
+
+If the same error occurs in the same code, the script handles this efficiently by using a caching system to store previously generated debugging suggestions. If a cache of the debugging suggestion for the current code and error exists, the script fetches it from the cache instead of sending another request to the API.
 
 ## License
 
