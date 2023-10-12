@@ -16,6 +16,7 @@ If the same error occurs in the same code, the script handles this efficiently b
 
 ## TODO
 1. Add the abillity to choose specific files from dir or exclude specific files
+1. Map the file structure to make the AI aware of it 
 
 ## Installation
 
