@@ -80,7 +80,7 @@ python debug.py [--model <openai_model>] [--temperature <model_temperature>] [--
 
 Replace the placeholders with appropriate values:
 
-- `<openai_model>`: (optional) The OpenAI debugging model to use. Default: 'gpt-3.5-turbo-16k'. Options: 'gpt-4', 'gpt-3.5-turbo-16k', 'gpt-3.5-turbo'.
+- `<openai_model>`: (optional) The OpenAI model to use. Default: 'gpt-3.5-turbo-16k'. Options: 'gpt-4', 'gpt-3.5-turbo-16k', 'gpt-3.5-turbo'.
 - `<model_temperature>`: (optional) Temperature of response. Default: 1.
 - `<max_output_tokens>`: (optional) Maximum output tokens in response.
 - `<programming_language>`: (optional) The programming language of the code you want to debug.
