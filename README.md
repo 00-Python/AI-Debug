@@ -76,7 +76,7 @@ Or better yet, contribute and open a pull request with your fixes for the commun
 
 ## :heart: Contributing
 
-We'd love to welcome contributors who can help make this project better. If you're interested, do check out the [Contributing Guide](CONTRIBUTING.md) and [Code of Conduct](CODE_OF_CONDUCT.md).
+We'd love to welcome contributors who can help make this project better.
 
 ## :bookmark: License
 
