@@ -29,7 +29,7 @@ def main():
         debugger.clear_cache()
         return
 
-    code_dict = debugger.get_code_from_directory_or_file(args.path)
+    code_dict = debugger.get_files(args.path)
 
 
     if not code_dict:
@@ -50,9 +50,10 @@ def main():
 
     debugger.messages.append(
         {"role": "user", "content": f"Debug the following {args.language} code:"})
-    for filename, code_content in code_dict.items():
+
+    for rel_filepath, code_content in code_dict.items():
         debugger.messages.append(
-            {"role": "assistant", "content": f"File: {filename}\n\n{code_content}"})
+            {"role": "assistant", "content": f"File: {rel_filepath}\n\n{code_content}"})
 
     debugger.messages.append({"role": "user", "content": args.error})
 

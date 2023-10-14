@@ -23,6 +23,60 @@ class CodeDebugger:
         ]
         self.encoder = tiktoken.encoding_for_model(self.openai_model)
 
+    def get_files(self, path):
+        ignore_dirs = {"env", "venv", "__pycache__", ".git"}
+        files_dict = {}
+        file_and_dir_list = []
+
+        # Check if the path is a valid directory
+        if not os.path.isdir(path):
+            print("Invalid path provided.")
+            return files_dict
+
+        # Create a list of files and directories
+        for root, dirs, files in os.walk(path, topdown=True):
+            dirs[:] = [d for d in dirs if d not in ignore_dirs and not d.startswith('.')]
+            for file in files:
+                filepath = os.path.join(root, file)
+                file_and_dir_list.append(filepath)
+            for dir in dirs:
+                dirpath = os.path.join(root, dir)
+                file_and_dir_list.append(dirpath)
+
+        # Print out all available files and directories with paths relative to 'path'
+        for i, file_or_dir_path in enumerate(file_and_dir_list):
+            rel_path = os.path.relpath(file_or_dir_path, path)
+            if os.path.isdir(file_or_dir_path): # check if path is a directory
+                rel_path += "/" # append a '/' to the end of the path
+            print(f"{i+1}. {rel_path}")
+
+        file_choices = input(
+            "Choose files by typing the corresponding numbers (separated by a space for multiple files). You can also choose directories to select all files within that directory: "
+        ).split()
+        file_choices = [int(choice) for choice in file_choices]
+
+        # Check if the choices are valid
+        for choice in file_choices:
+            if 0 < choice <= len(file_and_dir_list):
+                file_or_dir_path = file_and_dir_list[choice - 1]
+                if os.path.isfile(file_or_dir_path):  # If it's a file
+                    with open(file_or_dir_path, "r") as file:
+                        rel_path = os.path.relpath(file_or_dir_path, path)
+                        files_dict[rel_path] = file.read()
+                else:  # If it's a directory
+                    for root, dirs, files in os.walk(file_or_dir_path):
+                        for file in files:
+                            filepath = os.path.join(root, file)
+                            rel_path = os.path.relpath(filepath, path)
+                            with open(filepath, "r") as file:
+                                files_dict[rel_path] = file.read()
+            else:
+                print(f"Invalid choice ({choice}). Please try again.")
+
+        return files_dict
+
+
+
     # Token & Price Counter Methods
     def count_tokens(self, data):
         encoding = self.encoder.encode(data)
@@ -123,6 +177,8 @@ class CodeDebugger:
             print("Invalid path provided.")
 
         return code_dict
+
+
 
 if __name__ == "__main__":
     pass
