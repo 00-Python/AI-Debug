@@ -63,7 +63,7 @@ Where:
 - `-t, --temperature`: The creative force of the prediction. Increase for more diverse output. Default is `1` and acceptable range is `0 - 2`.
 - `-o, --max-output-tokens`: The maximum tokens that the model will use to produce the output. Default is model specific.
 - `-l, --language`: The programming language of the debugging code. Currently supported: Python, Javascript, Java, C/C++, C#.
-- `-p, --path`: Path to the directory or file containing the code.
+- `-p, --path`: Path to the directory containing the codebase.
 - `-e, --error`: Error message or a description of the issue.
 
 **Note:** You can always use the `-h` or `--help` argument to see all available options for the Python Code Debugger.
