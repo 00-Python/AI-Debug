@@ -161,23 +161,6 @@ class CodeDebugger:
 
         return response.choices[0].message["content"].strip()
 
-    def get_code_from_directory_or_file(self, path):
-        code_dict = {}
-
-        if os.path.isfile(path):
-            with open(path, "r") as file:
-                code_dict[os.path.basename(path)] = file.read()
-        elif os.path.isdir(path):
-            for filename in os.listdir(path):
-                filepath = os.path.join(path, filename)
-                if os.path.isfile(filepath):
-                    with open(filepath, "r") as file:
-                        code_dict[filename] = file.read()
-        else:
-            print("Invalid path provided.")
-
-        return code_dict
-
 
 
 if __name__ == "__main__":
