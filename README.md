@@ -16,7 +16,7 @@ Welcome! This Python project offers you a remarkable debugging assistant powered
 
    Clone the repo with this command:
    ```bash
-   git clone https://github.com/Your_User_Name/AI-Code-Debugger.git
+   git clone https://github.com/00-Python/AI-Debug.git
    ```
 
 2. **Change directory**
