@@ -392,8 +392,8 @@ def parse_command_line_arguments():
     parser.add_argument("-e", "--error", type=str,  nargs='?',
                         help="Specific error message or description of the error or issue")
 
-    parser.add_argument("--clear-cache", action='store_true',
-                        help="Clear the cache")
+    # parser.add_argument("--clear-cache", action='store_true',
+    #                     help="Clear the cache")
     return parser.parse_args()
 
 @function_timer
