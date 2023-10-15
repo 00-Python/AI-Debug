@@ -7,10 +7,31 @@ import tempfile
 from platform import system as platform_system
 import tiktoken
 import argparse
+from typing import Dict, List, Tuple, Union
 
 
 class CodeDebugger:
-    def __init__(self, model, model_temperature, max_output_tokens):
+    """
+    The CodeDebugger class is responsible for debugging code by leveraging OpenAI models.
+
+    Attributes:
+        openai_model (str): Name of the OpenAI model to be used for debugging.
+        model_temperature (float): Temperature to control randomness of the model's response.
+        max_output_tokens (int): Maximum number of output tokens desired in the model's response.
+        tmp_cache_dir (str): Directory to store temporary cache.
+        messages (List[Dict[str,str]]): Messages exchanged with the API.
+        encoder (object): Encoder object to convert string to tokens.
+    """
+
+    def __init__(self, model: str, model_temperature: float, max_output_tokens: int):
+        """
+        Initializes CodeDebugger with model parameters and API details.
+
+        Parameters:
+            model (str): Name of the OpenAI model to be used for debugging. It should be a string and must be one of the available models.
+            model_temperature (float): Temperature to control randomness of the model's response. It should be a float between 0 and 1. Higher values will make the outcome more random.
+            max_output_tokens (int): Maximum number of output tokens desired in the model's response. It should be a positive integer. If it exceeds the model's limit, it could result in an error.
+        """
         self.openai_model = model
         self.model_temperature = model_temperature
         # self.max_output_tokens = {"gpt-3.5-turbo": 4096, "gpt-4": 8192, "gpt-4-32k": 32768, "gpt-3.5-turbo-16k": 16384}.get(self.openai_model, None)
@@ -20,78 +41,118 @@ class CodeDebugger:
             tempfile.gettempdir(), cache_file_name)
         openai.api_key = os.environ.get("OPENAI_API_KEY")
         self.messages = [
-            {"role": "system", "content": "You are a detailed code debugger assistant that doesn't miss a single error. You always point out where the error is and what is causing it."}
+            {"role": "system", "content": "You are a detailed code debugger that doesn't miss a single error. You always point out and explain where the error/s is/are, what is causing it/them and how to fix it/them."}
         ]
         self.encoder = tiktoken.encoding_for_model(self.openai_model)
 
+    def print_tokens_and_costs(self, code_dict: Dict[str, str]) -> None:
+        """
+        Print the total number of tokens in the given code and the associated cost of using those tokens with the active OpenAI model.
+        This function doesn't return anything; instead, it prints the calculated values to stdout.
 
-    def print_tokens_and_costs(self, code_dict):
+        Parameters:
+            code_dict (Dict[str, str]): A dictionary mapping file paths to source code. The tokens of this code will be counted and the costs will be calculated.
+        """
         code_content_combined = "".join(code_dict.values())
         input_tokens = self.count_tokens(str(self.messages))
         print(f"Total tokens in data: {input_tokens}")
         input_cost, output_cost = self.calculate_cost(input_tokens)
         print(f"Total cost: {self.format_cost(input_cost+output_cost, 4)} (Input tokens cost: {self.format_cost(input_cost, 9)}, Output tokens cost: {self.format_cost(output_cost, 5)})")
 
-    def get_files(self, path):
+    def get_directory_contents(self, path: str):
+        """
+        Fetches the directory contents and returns a dictionary
+
+        Parameters:
+            path (str): Directory path from which to fetch files
+
+        Returns:
+            Dict[str, str]: A dictionary where each key-value pair represents a relative file path and its content, respectively.
+        """
+
         ignore_dirs = {"env", "venv", "__pycache__", ".git"}
         files_dict = {}
-        file_and_dir_list = []
-
-        # Check if the path is a valid directory
         if not os.path.isdir(path):
             print("Invalid path provided.")
             return files_dict
-
-        # Create a list of files and directories
         for root, dirs, files in os.walk(path, topdown=True):
-            dirs[:] = [d for d in dirs if d not in ignore_dirs and not d.startswith('.')]
+            dirs[:] = [
+                d for d in dirs if d not in ignore_dirs and not d.startswith('.')]
             for file in files:
-                filepath = os.path.join(root, file)
-                file_and_dir_list.append(filepath)
-            for dir in dirs:
-                dirpath = os.path.join(root, dir)
-                file_and_dir_list.append(dirpath)
+                # get relative file path
+                rel_path = os.path.relpath(root + '/' + file, path)
+                with open(os.path.join(root, file), 'r') as f:
+                    files_dict[rel_path] = f.read()  # read the file contents
+        return files_dict
 
-        # Print out all available files and directories with paths relative to 'path'
-        for i, file_or_dir_path in enumerate(file_and_dir_list):
-            rel_path = os.path.relpath(file_or_dir_path, path)
-            if os.path.isdir(file_or_dir_path): # check if path is a directory
-                rel_path += "/" # append a '/' to the end of the path
-            print(f"{i+1}. {rel_path}")
+    def display_directory_contents(self, files_dict: Dict[str, str]) -> None:
+        """
+        Display all available files and directories on stdout.
+        """
+
+        for i, (filepath, content) in enumerate(files_dict.items()):
+            print(f"{i+1}. {filepath}")
+
+    def get_user_file_selection(self, files_dict: Dict[str, str]) -> Dict[str, str]:
+        """
+        Takes user input to select a subset of files.
+
+        Parameters:
+            files_dict (Dict[str, str]): User file selection.
+        """
 
         file_choices = input(
             "Choose files by typing the corresponding numbers (separated by a space for multiple files). You can also choose directories to select all files within that directory: "
         ).split()
         file_choices = [int(choice) for choice in file_choices]
+        chosen_files = {}
 
-        # Check if the choices are valid
+        file_keys = list(files_dict.keys())
+
         for choice in file_choices:
-            if 0 < choice <= len(file_and_dir_list):
-                file_or_dir_path = file_and_dir_list[choice - 1]
-                if os.path.isfile(file_or_dir_path):  # If it's a file
-                    with open(file_or_dir_path, "r") as file:
-                        rel_path = os.path.relpath(file_or_dir_path, path)
-                        files_dict[rel_path] = file.read()
-                else:  # If it's a directory
-                    for root, dirs, files in os.walk(file_or_dir_path):
-                        for file in files:
-                            filepath = os.path.join(root, file)
-                            rel_path = os.path.relpath(filepath, path)
-                            with open(filepath, "r") as file:
-                                files_dict[rel_path] = file.read()
+            if 0 < choice <= len(file_keys):
+                chosen_files[file_keys[choice-1]
+                             ] = files_dict[file_keys[choice-1]]
             else:
                 print(f"Invalid choice ({choice}). Please try again.")
 
-        return files_dict
+        return chosen_files
 
-    # Token & Price Counter Methods
-    def count_tokens(self, data):
+    def count_tokens(self, data: str) -> int:
+        """
+        Counts the number of tokens present in the provided string.
+        This function uses the encoder object of the class that's
+        created for the selected OpenAI model and counts the total encoder
+        token count of the provided string.
+
+        Parameters:
+            data (str): The string which needs its tokens to be counted.
+                        It can be a single line or multiline string.
+
+        Returns:
+            int: The total count of tokens present in the provided 'data'.
+        """
         encoding = self.encoder.encode(data)
         return len(encoding)
 
-    def calculate_cost(self, tokens):
+    def calculate_cost(self, tokens: int) -> Tuple[Union[None, float], Union[None, float]]:
+        """
+        Calculates the cost of the token usage based on the OpenAI model
+        used and returns the costs for both input and output tokens.
 
-        # token price is per 1k tokens
+        The function uses a dictionary to store the cost per token for input/output
+        for different OpenAI models. After finding the corresponding model's cost,
+        it multiplies the input token cost with the total token count and output
+        token cost with the maximum output tokens.
+
+        Parameters:
+            tokens (int): The total count of the tokens.
+
+        Returns:
+            Tuple[Union[None, float], Union[None, float]]: A tuple containing
+            the costs for input and output tokens. If the model's cost data
+            doesn't exist in the 'prices' dictionary, it returns (None, None).
+        """
         prices = {
             "gpt-4": {"input": 0.03, "output": 0.06},
             "gpt-4-32K": {"input": 0.06, "output": 0.12},
@@ -99,26 +160,44 @@ class CodeDebugger:
             "gpt-3.5-turbo-16k": {"input": 0.003, "output": 0.004},
         }
 
-        for model_name, price_data in prices.items():            
+        for model_name, price_data in prices.items():
             if self.openai_model == model_name:
                 cost_input = (price_data["input"] * tokens) / 1000
-                cost_output = (price_data["output"] * self.max_output_tokens)  / 1000
+                cost_output = (price_data["output"]
+                               * self.max_output_tokens) / 1000
                 return cost_input, cost_output
 
         return None, None
 
+    def format_cost(self, cost: float, decimals: int) -> str:
+        """
+        Formats the cost in a more human-readable string format using the specified number of decimal places.
 
-    # Convert cost to human-readable format
-    def format_cost(self, cost, decimals):
+        Parameters:
+            cost (float): The cost to be formatted. It should be a float representing the raw cost.
+            decimals (int): The number of decimal places to use in the output string. It should be a non-negative integer.
+
+        Returns:
+            str: A formatted string representing the cost, prefixed by the '£' symbol and with the specified number of decimal places.
+        """
         return f"£{cost:.{decimals}f}"
 
-    # Cache methods
+    def save_cache(self, cache_data: any) -> None:
+        """
+        Saves the cache data to a pickle file.
 
-    def save_cache(self, cache_data):
+        Parameters:
+        - cache_data: The cache data to save
+        """
         with open(self.tmp_cache_dir, 'wb') as file:
             pickle.dump(cache_data, file)
 
-    def load_cache(self):
+    def load_cache(self) -> Dict:
+        """
+        Tries to load the cached data from a pickle file.
+
+        Returns: The loaded cache data if the file existed and was valid, otherwise an empty dictionary.
+        """
         if os.path.exists(self.tmp_cache_dir):
             with open(self.tmp_cache_dir, 'rb') as file:
                 try:
@@ -127,18 +206,31 @@ class CodeDebugger:
                     pass
         return {}
 
-    def clear_cache(self):
+    def clear_cache(self) -> None:
+        """
+        Deletes the cache file if it exists.
+        """
         if os.path.exists(self.tmp_cache_dir):
             os.remove(self.tmp_cache_dir)
             print("Cache cleared.")
         else:
             print("Cache is already empty.")
 
-    def hash_code(self, code_content):
+    def hash_code(self, code_content: str) -> str:
         hash_object = hashlib.md5(code_content.encode())
         return hash_object.hexdigest()
 
-    def check_cache(self, model, messages, error, code_content):
+    def check_cache(self, model: str, messages: List[Dict[str, str]], error: str, code_content: str) -> None:
+        """
+        Check if the error's solution already exists in the cache. If it does, print the cached result.
+        If it doesn't, get new suggestions from the OpenAI model and cache them for future use.
+
+        Parameters:
+        - model: The key string identifying the OpenAI model to use
+        - messages: List of message-role-content dicts that is the log of messages to send to the OpenAI model for debugging
+        - error: Description of the error to check in the cache or ask the OpenAI model to debug if not in cache
+        - code_content: The content of the code that needs debugging. This is used along with the error to form a unique key in the cache
+        """
         cache_data = self.load_cache()
 
         if error in cache_data:
@@ -159,53 +251,109 @@ class CodeDebugger:
         print(computed_result)
 
     # Debug Methods
+    def get_suggestions_from_openai(self, model: str, messages: List[Dict[str, str]]) -> str:
+        """
+        Make a chat completion with the provided model and messages.
 
-    def get_suggestions_from_openai(self, model, messages):
+        Parameters:
+        - model: The key string identifying the OpenAI model to use
+        - messages: List of message-role-content dicts encompassing a chat log
+
+        Returns: The content of the response message
+        """
         if self.max_output_tokens != 0:
-            response = openai.ChatCompletion.create(model=model,max_tokens=self.max_output_tokens, temperature=self.model_temperature, messages=messages)
+            response = openai.ChatCompletion.create(
+                model=model, max_tokens=self.max_output_tokens, temperature=self.model_temperature, messages=messages)
         else:
-            response = openai.ChatCompletion.create(model=model, temperature=self.model_temperature, messages=self.messages)
+            response = openai.ChatCompletion.create(
+                model=model, temperature=self.model_temperature, messages=self.messages)
 
         return response.choices[0].message["content"].strip()
 
+    def construct_messages(self, language: str, code_dict: Dict[str, str], error: str) -> List[Dict[str, str]]:
+        """
+        Constructs the messages to send to the openAI model.
 
-    def construct_messages(self, language, code_dict, error):
-        self.messages.append({"role": "user", "content": f"Debug the following {language} code:"})
+        Parameters:
+        - language:  The programming language of the code
+        - code_dict: Dictionary where the keys are relative file paths and the values are corresponding file contents
+        - error: Description of the error to ask the OpenAI model to debug
+
+        Returns: List of message-role-content dictionaries that can be directly sent to the OpenAI model
+        """
+        self.messages.append(
+            {"role": "user", "content": f"Debug the following {language} code:"})
 
         for rel_filepath, code_content in code_dict.items():
-            self.messages.append({"role": "assistant", "content": f"File: {rel_filepath}\n\n{code_content}"})
+            self.messages.append(
+                {"role": "assistant", "content": f" {rel_filepath} is the relative path of the following code's source file: \n'''{language}\n{code_content}\n'''"})
 
-        self.messages.append({"role": "user", "content": f"Problem/Error: {error}"})
+        self.messages.append(
+            {"role": "user", "content": f"Problem/Error: {error}"})
 
         return self.messages
 
-def run_debugger():
-    # Parsing command line arguments
-    parser = argparse.ArgumentParser(description="AI Code Debugger & Helper CLI")
+
+def parse_command_line_arguments():
+    parser = argparse.ArgumentParser(
+        description="AI Code Debugger & Helper CLI")
     parser.add_argument("-m", "--model", type=str, default="gpt-3.5-turbo-16k",
                         help="Name of the OpenAI model to use (default: 'gpt-3.5-turbo-16k' Others: 'gpt-4', 'gpt-3.5-turbo')")
     parser.add_argument("-t", "--temperature", type=float, default=1,
                         help="Temperature of response (Default is 1, can be between 0 and 2)")
     parser.add_argument("-o", "--max-output-tokens", type=int, default=0,
                         help="Maximum output tokens in response (Default: GPT-3.5 Turbo: 4096 tokens, GPT-3.5-Turbo 16k: 16,384 tokens, GPT-4: 8192 tokens, GPT-4 32K: 32768 tokens)")
-    parser.add_argument("-l", "--language", type=str, help="Programming language of the code")
-    parser.add_argument("-p", "--path", type=str, help="Path to the directory containing code files")
-    parser.add_argument("-e", "--error", type=str, help="Specific error message or description of the error or issue")
-    parser.add_argument("--clear-cache", action='store_true', help="Clear the cache")
-    args = parser.parse_args()
+    parser.add_argument("-l", "--language", type=str,
+                        help="Programming language of the code")
+    parser.add_argument("-p", "--path", type=str,
+                        help="Path to the directory containing codebase")
+    parser.add_argument("-e", "--error", type=str, default=sys.stdin, nargs='?',
+                        help="Specific error message or description of the error or issue")
+    parser.add_argument("--clear-cache", action='store_true',
+                        help="Clear the cache")
+    return parser.parse_args()
 
-    # Creating an debugger instance
-    debugger = CodeDebugger(str(args.model), args.temperature, int(args.max_output_tokens))
+
+def get_input_confirmation():
+    if input('Continue? (y/n) ').lower() == 'n':
+        sys.exit()
+
+
+def run_debugger():
+    args = parse_command_line_arguments()
+
+    if args.error is None:
+        # if -e is not used, try to use piped input
+        if not sys.stdin.isatty():
+            args.error = sys.stdin.read().strip()
+
+    if len(sys.argv) == 1:
+        parser.print_help(sys.stderr)
+        sys.exit(1)
+
+    debugger = CodeDebugger(
+        str(args.model), args.temperature, int(args.max_output_tokens))
 
     if args.clear_cache:
         debugger.clear_cache()
         return
 
-    # Getting code files
-    code_dict = debugger.get_files(args.path)
+    code_dict = debugger.get_directory_contents(args.path)
+    debugger.display_directory_contents(code_dict)
+    code_dict = debugger.get_user_file_selection(code_dict)
 
     if not code_dict:
         print("No code files found.")
+        return
+
+    # New checks for piped `sys.stdin` input
+    error = args.error
+    if error is None:
+        if not sys.stdin.isatty():  # If data is available in a pipeline
+            error = sys.stdin.read().strip()
+
+    if not error:
+        print("No error provided for debugging. Please provide an error description through -e argument or by piping in.")
         return
 
     # Combine code content and create hash
@@ -220,7 +368,8 @@ def run_debugger():
             print(cached_result)
             return
 
-    constructed_messages = debugger.construct_messages(args.language, code_dict, args.error)
+    constructed_messages = debugger.construct_messages(
+        args.language, code_dict, args.error)
 
     input_tokens = debugger.count_tokens(str(debugger.messages))
     print(f"Total tokens in data: {input_tokens}")
@@ -229,14 +378,11 @@ def run_debugger():
     print(f"Total cost: {debugger.format_cost(input_cost+output_cost, 4)} (Input tokens cost: {debugger.format_cost(input_cost, 9)}, Output tokens cost: {debugger.format_cost(output_cost, 5)})")
 
     # Confirm and print result
-    if input('Continue? (y/n) ').lower() == 'n':
-        sys.exit()
+    get_input_confirmation()
     print()
 
     debugger.check_cache(args.model, debugger.messages,
-                        args.error, code_content_combined)
-
-
+                         args.error, code_content_combined)
 
 
 if __name__ == "__main__":
