@@ -7,7 +7,46 @@ import tempfile
 from platform import system as platform_system
 import tiktoken
 import argparse
-from typing import Dict, List, Tuple, Union
+from typing import Dict, List, Tuple, Union, Callable
+import time
+
+
+timer_switch = False
+
+
+def function_timer(func: Callable) -> Callable:
+    """
+    A decorator that prints the function execution time in seconds. When applied to a function, this decorator 
+    adds functionality to calculate the start and end time of execution, then it calculates the difference 
+    between these which results in the time taken to execute the function. 
+  
+    Usage:
+        @function_timer
+        def test_function():
+            ...
+    
+    Parameters:
+        func (Callable): The function to time.
+
+    Returns:
+        Callable: The wrapped function. This function behaves exactly like the input function 'func', 
+                  but with an additional printing of its execution time in seconds.
+    """
+
+    def wrapper(*args, **kwargs):
+        # Reference the global switch
+        global timer_switch 
+        if timer_switch: # Check if timers should be active
+            start_time = time.time()
+            result = func(*args, **kwargs)
+            end_time = time.time()
+            print(
+                f"Function {func.__name__} took {end_time - start_time} seconds to execute.")
+            return result
+        else: 
+            return func(*args, **kwargs)  # If switch is off, execute the function without timing
+    return wrapper
+
 
 
 class CodeDebugger:
@@ -23,7 +62,8 @@ class CodeDebugger:
         encoder (object): Encoder object to convert string to tokens.
     """
 
-    def __init__(self, model: str, model_temperature: float, max_output_tokens: int):
+    @function_timer
+    def __init__(self, model: str = "gpt-3.5-turbo-16k", model_temperature: float = 1, max_output_tokens: int = 0):
         """
         Initializes CodeDebugger with model parameters and API details.
 
@@ -41,10 +81,15 @@ class CodeDebugger:
             tempfile.gettempdir(), cache_file_name)
         openai.api_key = os.environ.get("OPENAI_API_KEY")
         self.messages = [
-            {"role": "system", "content": "You are a detailed code debugger that doesn't miss a single error. You always point out and explain where the error/s is/are, what is causing it/them and how to fix it/them."}
+            {"role": "system", "content": "You are a detailed code debugger that doesn't miss a single error. You explain Where the errors are, what is causing them and how to fix them."},
+            {"role": "system", "content": "You also help with refactoring and optimization."},
+            {"role": "system", "content": "You provide guidance on improving security."},
+            {"role": "system", "content": "You also provide general improvement suggestions."},
+            {"role": "system", "content": "You also help with Documentation of the project."},
         ]
         self.encoder = tiktoken.encoding_for_model(self.openai_model)
 
+    @function_timer
     def print_tokens_and_costs(self, code_dict: Dict[str, str]) -> None:
         """
         Print the total number of tokens in the given code and the associated cost of using those tokens with the active OpenAI model.
@@ -59,12 +104,15 @@ class CodeDebugger:
         input_cost, output_cost = self.calculate_cost(input_tokens)
         print(f"Total cost: {self.format_cost(input_cost+output_cost, 4)} (Input tokens cost: {self.format_cost(input_cost, 9)}, Output tokens cost: {self.format_cost(output_cost, 5)})")
 
-    def get_directory_contents(self, path: str):
+    @function_timer
+    def get_directory_contents(self, path: str, max_depth: int, current_depth: int = 0):
         """
         Fetches the directory contents and returns a dictionary
 
         Parameters:
             path (str): Directory path from which to fetch files
+            max_depth (int): Maximum recursion depth
+            current_depth (int): Current recursion depth (default is 0 for the start)
 
         Returns:
             Dict[str, str]: A dictionary where each key-value pair represents a relative file path and its content, respectively.
@@ -76,23 +124,45 @@ class CodeDebugger:
             print("Invalid path provided.")
             return files_dict
         for root, dirs, files in os.walk(path, topdown=True):
-            dirs[:] = [
-                d for d in dirs if d not in ignore_dirs and not d.startswith('.')]
+            # Check recursion depth
+            if current_depth > max_depth:
+                return files_dict
+            
+            dirs[:] = [d for d in dirs if d not in ignore_dirs and not d.startswith('.')]
+
+            for dir in dirs:
+                rel_path = os.path.relpath(root + '/' + dir, path)
+                files_dict[rel_path] = "Directory"
+
             for file in files:
                 # get relative file path
                 rel_path = os.path.relpath(root + '/' + file, path)
-                with open(os.path.join(root, file), 'r') as f:
-                    files_dict[rel_path] = f.read()  # read the file contents
+                try:
+                    with open(os.path.join(root, file), 'rb') as f:
+                        content = f.read().decode('utf-8', errors='replace')
+                    files_dict[rel_path] = content
+                except Exception as e:
+                    print(f"Failed to process file: {os.path.join(root, file)}. Error: {str(e)}")
+                    continue
+
+
+            current_depth += 1
+
         return files_dict
 
+    @function_timer
     def display_directory_contents(self, files_dict: Dict[str, str]) -> None:
         """
         Display all available files and directories on stdout.
         """
 
         for i, (filepath, content) in enumerate(files_dict.items()):
-            print(f"{i+1}. {filepath}")
+            if content == "Directory":
+                print(f"{i+1}. {filepath} (Directory)")
+            else:
+                print(f"{i+1}. {filepath} (File)")
 
+    @function_timer
     def get_user_file_selection(self, files_dict: Dict[str, str]) -> Dict[str, str]:
         """
         Takes user input to select a subset of files.
@@ -118,6 +188,7 @@ class CodeDebugger:
 
         return chosen_files
 
+    @function_timer
     def count_tokens(self, data: str) -> int:
         """
         Counts the number of tokens present in the provided string.
@@ -135,6 +206,7 @@ class CodeDebugger:
         encoding = self.encoder.encode(data)
         return len(encoding)
 
+    @function_timer
     def calculate_cost(self, tokens: int) -> Tuple[Union[None, float], Union[None, float]]:
         """
         Calculates the cost of the token usage based on the OpenAI model
@@ -169,6 +241,7 @@ class CodeDebugger:
 
         return None, None
 
+    @function_timer
     def format_cost(self, cost: float, decimals: int) -> str:
         """
         Formats the cost in a more human-readable string format using the specified number of decimal places.
@@ -182,6 +255,7 @@ class CodeDebugger:
         """
         return f"£{cost:.{decimals}f}"
 
+    @function_timer
     def save_cache(self, cache_data: any) -> None:
         """
         Saves the cache data to a pickle file.
@@ -192,6 +266,7 @@ class CodeDebugger:
         with open(self.tmp_cache_dir, 'wb') as file:
             pickle.dump(cache_data, file)
 
+    @function_timer
     def load_cache(self) -> Dict:
         """
         Tries to load the cached data from a pickle file.
@@ -206,6 +281,7 @@ class CodeDebugger:
                     pass
         return {}
 
+    @function_timer
     def clear_cache(self) -> None:
         """
         Deletes the cache file if it exists.
@@ -216,10 +292,12 @@ class CodeDebugger:
         else:
             print("Cache is already empty.")
 
+    @function_timer
     def hash_code(self, code_content: str) -> str:
         hash_object = hashlib.md5(code_content.encode())
         return hash_object.hexdigest()
 
+    @function_timer
     def check_cache(self, model: str, messages: List[Dict[str, str]], error: str, code_content: str) -> None:
         """
         Check if the error's solution already exists in the cache. If it does, print the cached result.
@@ -250,7 +328,7 @@ class CodeDebugger:
         print("Suggestions:")
         print(computed_result)
 
-    # Debug Methods
+    @function_timer
     def get_suggestions_from_openai(self, model: str, messages: List[Dict[str, str]]) -> str:
         """
         Make a chat completion with the provided model and messages.
@@ -270,6 +348,7 @@ class CodeDebugger:
 
         return response.choices[0].message["content"].strip()
 
+    @function_timer
     def construct_messages(self, language: str, code_dict: Dict[str, str], error: str) -> List[Dict[str, str]]:
         """
         Constructs the messages to send to the openAI model.
@@ -286,14 +365,15 @@ class CodeDebugger:
 
         for rel_filepath, code_content in code_dict.items():
             self.messages.append(
-                {"role": "assistant", "content": f" {rel_filepath} is the relative path of the following code's source file: \n'''{language}\n{code_content}\n'''"})
+                {"role": "user", "content": f" File={rel_filepath}  Content=```{language}\n{code_content}```"})
 
         self.messages.append(
-            {"role": "user", "content": f"Problem/Error: {error}"})
+            {"role": "user", "content": f"Encountered Problem/Error: {error}"})
 
         return self.messages
 
 
+@function_timer
 def parse_command_line_arguments():
     parser = argparse.ArgumentParser(
         description="AI Code Debugger & Helper CLI")
@@ -305,25 +385,21 @@ def parse_command_line_arguments():
                         help="Maximum output tokens in response (Default: GPT-3.5 Turbo: 4096 tokens, GPT-3.5-Turbo 16k: 16,384 tokens, GPT-4: 8192 tokens, GPT-4 32K: 32768 tokens)")
     parser.add_argument("-l", "--language", type=str,
                         help="Programming language of the code")
+    parser.add_argument("-ft", "--function-timer", type=bool,
+                        help="Function execution timer")
     parser.add_argument("-p", "--path", type=str,
                         help="Path to the directory containing codebase")
-    parser.add_argument("-e", "--error", type=str, default=sys.stdin, nargs='?',
+    parser.add_argument("-e", "--error", type=str,  nargs='?',
                         help="Specific error message or description of the error or issue")
+
     parser.add_argument("--clear-cache", action='store_true',
                         help="Clear the cache")
     return parser.parse_args()
 
-
-def get_input_confirmation():
-    if input('Continue? (y/n) ').lower() == 'n':
-        sys.exit()
-
-
-def run_debugger():
-    args = parse_command_line_arguments()
-
+@function_timer
+def args_handler(args):
     if args.error is None:
-        # if -e is not used, try to use piped input
+    # if -e is not used, try to use piped input
         if not sys.stdin.isatty():
             args.error = sys.stdin.read().strip()
 
@@ -331,14 +407,29 @@ def run_debugger():
         parser.print_help(sys.stderr)
         sys.exit(1)
 
+    if args.clear_cache:
+        cache_debugger = CodeDebugger()
+        cache_debugger.clear_cache()
+        return
+    
+    return args
+
+
+@function_timer
+def get_input_confirmation():
+    if input('Continue? (y/n) ').lower() == 'n':
+        sys.exit()
+
+
+@function_timer
+def run_debugger():
+    args = parse_command_line_arguments()
+    args_handler(args)
+    
     debugger = CodeDebugger(
         str(args.model), args.temperature, int(args.max_output_tokens))
 
-    if args.clear_cache:
-        debugger.clear_cache()
-        return
-
-    code_dict = debugger.get_directory_contents(args.path)
+    code_dict = debugger.get_directory_contents(args.path, 0)
     debugger.display_directory_contents(code_dict)
     code_dict = debugger.get_user_file_selection(code_dict)
 
@@ -357,16 +448,16 @@ def run_debugger():
         return
 
     # Combine code content and create hash
-    code_content_combined = "".join(code_dict.values())
-    code_hash = debugger.hash_code(code_content_combined)
+    # code_content_combined = "".join(code_dict.values())
+    # code_hash = debugger.hash_code(code_content_combined)
 
-    cache_data = debugger.load_cache()
-    if code_hash in cache_data:
-        cached_code_hash, cached_result = cache_data[code_hash]
-        if cached_code_hash == code_hash:
-            print("Using cached suggestions:")
-            print(cached_result)
-            return
+    # cache_data = debugger.load_cache()
+    # if code_hash in cache_data:
+    #     cached_code_hash, cached_result = cache_data[code_hash]
+    #     if cached_code_hash == code_hash:
+    #         print("Using cached suggestions:")
+    #         print(cached_result)
+    #         return
 
     constructed_messages = debugger.construct_messages(
         args.language, code_dict, args.error)
@@ -381,8 +472,10 @@ def run_debugger():
     get_input_confirmation()
     print()
 
-    debugger.check_cache(args.model, debugger.messages,
-                         args.error, code_content_combined)
+    # debugger.check_cache(args.model, debugger.messages,
+    #                      args.error, code_content_combined)
+
+    print(debugger.get_suggestions_from_openai(args.model, debugger.messages))
 
 
 if __name__ == "__main__":
