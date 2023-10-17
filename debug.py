@@ -1,14 +1,15 @@
+from typing import Dict, List, Tuple, Union, Callable
 import os
 import sys
-import openai
+import time
 import pickle
 import hashlib
 import tempfile
-from platform import system as platform_system
-import tiktoken
 import argparse
-from typing import Dict, List, Tuple, Union, Callable
-import time
+import tiktoken
+import openai
+
+from lsdir.lsdir import Lsdir
 
 
 timer_switch = False
@@ -127,7 +128,7 @@ class CodeDebugger:
             # Check recursion depth
             if current_depth > max_depth:
                 return files_dict
-            
+
             dirs[:] = [d for d in dirs if d not in ignore_dirs and not d.startswith('.')]
 
             for dir in dirs:
@@ -144,9 +145,31 @@ class CodeDebugger:
                 except Exception as e:
                     print(f"Failed to process file: {os.path.join(root, file)}. Error: {str(e)}")
                     continue
-
-
             current_depth += 1
+
+        return files_dict
+
+    @function_timer
+    def get_directory_contents_depth(self, path: str, levels: int) -> Dict[str, str]:
+        ignore_dirs = {"env", "venv", "__pycache__", ".git", "static", "assets", "media"}
+        files_dict = {}
+
+        if not os.path.isdir(path):
+            print("Invalid path provided.")
+            return files_dict
+
+        for directory in os.listdir(path):
+            newPath = os.path.join(path, directory)
+            if directory in ignore_dirs or directory.startswith('.'):
+                continue
+
+            if(levels > 0 and os.path.isdir(newPath)):
+                files_dict.update(self.get_directory_contents_depth(newPath, levels-1))
+            elif(os.path.isfile(newPath)):
+                with open(newPath, 'rb') as f:
+                    content = f.read().decode('utf-8', errors='replace')
+                rel_path = os.path.relpath(newPath, path)
+                files_dict[rel_path] = content
 
         return files_dict
 
@@ -407,10 +430,10 @@ def args_handler(args):
         parser.print_help(sys.stderr)
         sys.exit(1)
 
-    if args.clear_cache:
-        cache_debugger = CodeDebugger()
-        cache_debugger.clear_cache()
-        return
+    # if args.clear_cache:
+    #     cache_debugger = CodeDebugger()
+    #     cache_debugger.clear_cache()
+    #     return
     
     return args
 
@@ -429,7 +452,7 @@ def run_debugger():
     debugger = CodeDebugger(
         str(args.model), args.temperature, int(args.max_output_tokens))
 
-    code_dict = debugger.get_directory_contents(args.path, 0)
+    code_dict = debugger.get_directory_contents(args.path, 1)
     debugger.display_directory_contents(code_dict)
     code_dict = debugger.get_user_file_selection(code_dict)
 
@@ -480,3 +503,17 @@ def run_debugger():
 
 if __name__ == "__main__":
     run_debugger()
+    # files = Lsdir()
+    # data = files.scan_cwd()
+
+    # levels = files.count_levels(data)
+    # print(levels)
+    # files.print_tree(data, max_levels=2)  
+
+    # while True:
+
+    #     id = int(input("File: "))
+
+    #     data2 = files.find_item_by_id(id, data)
+    #     print(id)
+    #     print(data2)
