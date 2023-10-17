@@ -91,21 +91,6 @@ class CodeDebugger:
         self.encoder = tiktoken.encoding_for_model(self.openai_model)
 
     @function_timer
-    def print_tokens_and_costs(self, code_dict: Dict[str, str]) -> None:
-        """
-        Print the total number of tokens in the given code and the associated cost of using those tokens with the active OpenAI model.
-        This function doesn't return anything; instead, it prints the calculated values to stdout.
-
-        Parameters:
-            code_dict (Dict[str, str]): A dictionary mapping file paths to source code. The tokens of this code will be counted and the costs will be calculated.
-        """
-        code_content_combined = "".join(code_dict.values())
-        input_tokens = self.count_tokens(str(self.messages))
-        print(f"Total tokens in data: {input_tokens}")
-        input_cost, output_cost = self.calculate_cost(input_tokens)
-        print(f"Total cost: {self.format_cost(input_cost+output_cost, 4)} (Input tokens cost: {self.format_cost(input_cost, 9)}, Output tokens cost: {self.format_cost(output_cost, 5)})")
-
-    @function_timer
     def get_directory_contents(self, path: str, max_depth: int, current_depth: int = 0):
         """
         Fetches the directory contents and returns a dictionary
@@ -277,6 +262,22 @@ class CodeDebugger:
             str: A formatted string representing the cost, prefixed by the '£' symbol and with the specified number of decimal places.
         """
         return f"£{cost:.{decimals}f}"
+    
+    @function_timer
+    def print_tokens_and_costs(self, code_dict: Dict[str, str]) -> None:
+        """
+        Print the total number of tokens in the given code and the associated cost of using those tokens with the active OpenAI model.
+        This function doesn't return anything; instead, it prints the calculated values to stdout.
+
+        Parameters:
+            code_dict (Dict[str, str]): A dictionary mapping file paths to source code. The tokens of this code will be counted and the costs will be calculated.
+        """
+        code_content_combined = "".join(code_dict.values())
+        input_tokens = self.count_tokens(str(self.messages))
+        print(f"Total tokens in data: {input_tokens}")
+        input_cost, output_cost = self.calculate_cost(input_tokens)
+        print(f"Total cost: {self.format_cost(input_cost+output_cost, 4)} (Input tokens cost: {self.format_cost(input_cost, 9)}, Output tokens cost: {self.format_cost(output_cost, 5)})")
+
 
     @function_timer
     def save_cache(self, cache_data: any) -> None:
