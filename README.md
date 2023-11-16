@@ -63,7 +63,7 @@ Remember to replace `<directory>`, `<language>`, `<command>`, `<model>`, `<tempe
 
 ## Credits
 
-This project has borrowed code from [TheR1D's shell_gpt project](https://github.com/TheR1D/shell_gpt/blob/main/sgpt/client.py). We would like to express our gratitude for their contribution to the open-source community which has greatly aided the development of this project.
+This project has borrowed code from [TheR1D's shell_gpt project](https://github.com/TheR1D/shell_gpt/blob/main/sgpt/client.py). I would like to express my gratitude for the contribution to the open-source community which has greatly aided the development of this project.
 
 ## Contributing
 
