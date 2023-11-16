@@ -123,7 +123,7 @@ class OpenAIClient:
 def main(messages):
     # Example usage of OpenAIClient
     api_host = os.getenv("OPENAI_API_HOST", "https://api.openai.com")  # Replace with your API host
-    api_key = "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"    # Replace with your API key
+    api_key = ""    # Replace with your API key
 
     client = OpenAIClient(api_host, api_key)
 
