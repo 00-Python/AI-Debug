@@ -1,87 +1,74 @@
-# Python AI Code Debugger
+# AIDebug Console
 
-Welcome! This Python project offers you a remarkable debugging assistant powered by OpenAI's advanced machine learning models.
+AIDebug Console is a Python-based command line application that leverages the power of OpenAI's GPT models to assist with debugging and developing software projects. It provides a user-friendly interface for interacting with your codebase, running your project, and even debugging your code with the help of AI.
 
-## :star2: Features
+## Features
 
-**Suggests Bug Fixes:** The AI suggests potential bug fixes for your code, so you can simply focus on development.
+- **Project Management**: Select and deselect project files and directories.
+- **Project Configuration**: Configure specific project details such as language, type, framework, and run command.
+- **Code Execution**: Run your project directly from the console.
+- **AI Debugging**: Debug your project with the help of OpenAI's GPT Models.
+- **AI Feature Request**: Request a feature for your project from OpenAI's GPT Models.
 
-**Token Count and Costs:** The application helps you estimate the tokens used in sending requests to the OpenAI API and provides a cost estimation as well!
+## Installation
 
-**Cache Facilities:** Not want to waste tokens on repeated issues? The application can save suggestions for earlier seen issues in a cache file.
-
-## :fast_forward: Quick Start
-
-1. **Get the files**
-
-   Clone the repo with this command:
-   ```bash
-   git clone https://github.com/00-Python/AI-Debug.git
-   ```
-
-2. **Change directory**
-
-   Change to the `AI-Code-Debugger` directory:
-   ```bash
-   cd AI-Code-Debugger
-   ```
-
-3. **Setup**
-
-   Install required dependencies using pip:
-
-   ```bash
-   pip install -r requirements.txt
-   ```
-
-   Next, export the OpenAI API key as an environment variable:
-
-   ```bash
-   export OPENAI_API_KEY='your_api_key'
-   ```
-
-4. **Run**
-
-   Now, you're ready for debugging:
-
-   ```bash
-   python debug.py -l Python -p /path/to/your/code -e "Error message here"
-   ```
-
-## :whale: Detailed Usage
-
-The Python AI Code Debugger is designed to be highly flexible and customizable to accommodate various debugging needs.
-
-You can launch the Python Debugger with various options to control its behavior:
+1. Clone the repository to your local machine.
+2. Navigate to the project directory.
+3. Install the required Python packages using pip:
 
 ```bash
-python debug.py -m gpt-3.5-turbo -t 1.0 -o 500 -l Python -p your_code_dir -e "Your error message"
+pip install -r requirements.txt
 ```
 
-Where:
-- `-m, --model`: OpenAI Model to use for debugging assistance. Defaults to `gpt-3.5-turbo`. (supported: 'gpt-3.5-turbo', 'gpt-3.5-turbo-16k', 'gpt-4', 'gpt-4-32k')
-- `-t, --temperature`: The creative force of the prediction. Increase for more diverse output. Default is `1` and acceptable range is `0 - 2`.
-- `-o, --max-output-tokens`: The maximum tokens that the model will use to produce the output. Default is model specific.
-- `-l, --language`: The programming language of the debugging code. Currently supported: Python, Javascript, Java, C/C++, C#.
-- `-p, --path`: Path to the directory containing the codebase.
-- `-e, --error`: Error message or a description of the issue.
+4. Set the necessary environment variables. You need to provide your OpenAI API key:
 
-**Note:** You can always use the `-h` or `--help` argument to see all available options for the Python Code Debugger.
+```bash
+export OPENAI_API_KEY=your_openai_api_key
+```
 
-## :ticket: Need Help?
+## Usage
 
-If you're stuck at any point, be sure to post the issue to the repository's Issue Tracker. We're here to help.
+1. Run the script:
 
-Or better yet, contribute and open a pull request with your fixes for the community! We're always looking out for folks who want to help out.
+```bash
+python aidebug.py
+```
 
-## :heart: Contributing
+2. Use the `help` command to see a list of available commands.
 
-We'd love to welcome contributors who can help make this project better.
+## Environment Variables
 
-## :bookmark: License
+- `OPENAI_API_HOST`: The API host for OpenAI. Default is `https://api.openai.com`.
+- `OPENAI_API_KEY`: Your OpenAI API key.
 
-This project is licensed under the GNU General Public License v3.0. See the [LICENSE](LICENSE.md) file for more information.
+# Commands
+Here is a brief explanation of the commands available in the AIDebug Console:
 
-## :clap: Join the Community
+- `cd <directory>`: Change the current working directory.
+- `exit`: Exit the AIDebug Console.
+- `project select`: Select project files and directories.
+- `project deselect`: Unselect files and directories by id.
+- `project run`: Run the project.
+- `project files`: Display the selected project files.
+- `config project language <language>`: Set the programming language of your project.
+- `config project type`: Set the type of your project.
+- `config project framework`: Set the framework that your project is using.
+- `config project run <command>`: Set the command used to run your project.
+- `config openai model <model>`: Set the OpenAI model to be used.
+- `config openai temperature <temperature>`: Set the OpenAI model's temperature.
+- `debug <error>`: Debug your project with the help of OpenAI's GPT Models.
+- `feature <feature_request>`: Request a feature for your project from OpenAI's GPT Models.
 
-Don't forget to star the repo if you like what you see, and watch for new updates.
+Remember to replace `<directory>`, `<language>`, `<command>`, `<model>`, `<temperature>`, `<error>`, and `<feature_request>` with your actual values.
+
+## Credits
+
+This project has borrowed code from [TheR1D's shell_gpt project](https://github.com/TheR1D/shell_gpt/blob/main/sgpt/client.py). We would like to express our gratitude for their contribution to the open-source community which has greatly aided the development of this project.
+
+## Contributing
+
+Pull requests are welcome. For major changes, please open an issue first to discuss what you would like to change.
+
+## License
+
+[MIT](https://choosealicense.com/licenses/mit/)
