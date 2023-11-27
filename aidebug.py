@@ -299,7 +299,7 @@ class CodeDebuggerShell(cmd.Cmd):
         '''
 
         feature_messages = [
-            {"role": "system", "content": "You are a AI Code Documentation Creator. You Create README filed for projects Github page."},
+            {"role": "system", "content": "You are a AI Code Documentation Creator. You Create & Update README files for the projects Github page."},
             # {"role": "user", "content": f"" },
         ]
 
@@ -311,13 +311,18 @@ class CodeDebuggerShell(cmd.Cmd):
             feature_messages.append(new_message)
 
         codebase_message = [
-            {"role": "user", "content": "Here is the relevant codebase:"},]
+            {"role": "user", "content": "Here is the relevant codebase, if there are any new features you should add them to the readme:"},]
 
         for file in self.files_and_content:
             for path, content in file.items():
                 print(path)
                 message = {"role": "user", "content": f"File: {path} Content: {content}"}
                 codebase_message.append(message)
+        
+        if line:
+            user_message = {"role": "user", "content": f"User Request: {line}"}
+            codebase_message.append(user_message)
+
 
         for message in codebase_message:
             feature_messages.append(message)
