@@ -72,6 +72,7 @@ class CodeDebuggerShell(cmd.Cmd):
         '''Exit AIDebug Console'''
         return True
 
+    @error_handler
     def do_project(self, line):
         '''Perform project related operations. Available subcommands include:
 
@@ -193,6 +194,7 @@ class CodeDebuggerShell(cmd.Cmd):
         else:
             print("Invalid Command!")
 
+    @error_handler
     def do_debug(self, line):
         '''Debug project with GPT. Input the error message as the argument to the debug command.
 
@@ -230,6 +232,7 @@ class CodeDebuggerShell(cmd.Cmd):
             print(completion, end='')
         print()
 
+    @error_handler
     def do_feature(self, line):
         '''Request a feature for your project from GPT. Describe the required feature as an argument.
 
@@ -237,17 +240,17 @@ class CodeDebuggerShell(cmd.Cmd):
         feature <feature description> -> Describe the required feature as an argument.
         '''
 
-        debug_messages = [
+        feature_messages = [
             {"role": "system", "content": "You are a AI coding assistant. Upon request you imporove code, create features and refactor code."},
             # {"role": "user", "content": f"" },
         ]
 
         if self.project_framework:
             new_message = {"role": "user", "content": f"This is a {self.project_type} project, the project uses {self.project_language} and {self.project_framework} framework."}
-            debug_messages.append(new_message)
+            feature_messages.append(new_message)
         else:
             new_message = {"role": "user", "content": f"This is a {self.project_type} project, the project uses {self.project_language}."}
-            debug_messages.append(new_message)
+            feature_messages.append(new_message)
 
         codebase_message = [
             {"role": "user", "content": "Here is the relevant codebase:"},]
@@ -261,12 +264,44 @@ class CodeDebuggerShell(cmd.Cmd):
         codebase_message.append(error_message)
 
         for message in codebase_message:
-            debug_messages.append(message)
+            feature_messages.append(message)
 
-        for completion in self.client.get_completion(list(debug_messages), model=self.openai_model, temperature=self.openai_model_temperature):
+        for completion in self.client.get_completion(list(feature_messages), model=self.openai_model, temperature=self.openai_model_temperature):
             print(completion, end='')
         print()
 
+    @error_handler
+    def do_readme(self, line):
+        '''Request a README.md for your projects Github Repository from GPT.
+        '''
+
+        feature_messages = [
+            {"role": "system", "content": "You are a AI Code Documentation Creator. You Create README filed for projects Github page."},
+            # {"role": "user", "content": f"" },
+        ]
+
+        if self.project_framework:
+            new_message = {"role": "user", "content": f"This is a {self.project_type} project, the project uses {self.project_language} and {self.project_framework} framework."}
+            feature_messages.append(new_message)
+        else:
+            new_message = {"role": "user", "content": f"This is a {self.project_type} project, the project uses {self.project_language}."}
+            feature_messages.append(new_message)
+
+        codebase_message = [
+            {"role": "user", "content": "Here is the relevant codebase:"},]
+
+        for file in self.files_and_content:
+            for path, content in file.items():
+                print(path)
+                message = {"role": "user", "content": f"File: {path} Content: {content}"}
+                codebase_message.append(message)
+
+        for message in codebase_message:
+            feature_messages.append(message)
+
+        for completion in self.client.get_completion(list(feature_messages), model=self.openai_model, temperature=self.openai_model_temperature):
+            print(completion, end='')
+        print()
 
 
 if __name__ == "__main__":
