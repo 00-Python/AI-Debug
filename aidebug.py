@@ -9,6 +9,7 @@ import subprocess
 from colorama import Fore, Back, Style, init
 from aidebug.gui.select_dirs import DirectoryBrowser
 from aidebug.utils.files_data import scrape_contents
+from aidebug.utils.error_handler import error_handler
 from aidebug.clientv2.clientv2 import OpenAIClient
 from PyQt5.QtWidgets import QApplication
 
@@ -72,7 +73,20 @@ class CodeDebuggerShell(cmd.Cmd):
         return True
 
     def do_project(self, line):
-        '''Project related commands'''
+        '''Perform project related operations. Available subcommands include:
+
+        select: Prompts the user with a directory browser to select project files and directories.
+        deselect: Allows users to unselect previously selected files via a directory browser.
+        run: Runs the project using the previously set `project_run_command`.
+        files: Displays the currently selected file paths or file contents.
+
+        Usage: 
+        project select -> Launches directory browser to select files.
+        project deselect -> Launches directory browser to deselect files.
+        project run -> Runs the project using configured run command.
+        project files -> Prompts user to decide between displaying file paths or file contents.
+        '''
+
         line = line.lower().split()
 
         if line[0] == 'select':
@@ -138,22 +152,22 @@ class CodeDebuggerShell(cmd.Cmd):
             else:
                 print('Wrong Choice.')
 
+    @error_handler
     def do_config(self, line):
-        '''Configure specific project details.
-        1.config project
-            1.1. config project language
-                Set the programing languages your project is using ex. python, html and css
+        '''Configure project and OpenAI specifics. Available subcommands include:
 
-            1.2. config project type
-                Set project type, i.e is it a Web Development project? Is it a game development project?...
+        project: Options to set the project language, type, framework and run command.
+        openai: Options to set the OpenAI model and temperature.
 
-            1.3. config project framework
-                Set Frameworks that your project is using ex. Flask, Django...
+        Usage: 
+        config project language -> Prompts user to input project language.
+        config project type -> Prompts to describe the type of project.
+        config project framework -> Prompts to input the framework used in project.
+        config project run -> Prompts to input the command to run the project.
+        config openai model -> Sets the OpenAI model.
+        config openai temperature -> Sets model temperature.
+        '''
 
-            1.4. config project run
-                Configure the comand that is used to run your project ex. python app.py
-                    
-                    '''
         line = line.lower().split()
 
         if line[0] == 'project':
@@ -180,10 +194,14 @@ class CodeDebuggerShell(cmd.Cmd):
             print("Invalid Command!")
 
     def do_debug(self, line):
-        '''Debug project with GPT'''
+        '''Debug project with GPT. Input the error message as the argument to the debug command.
+
+        Usage: 
+        debug <error message> -> Provide the error message as an argument.
+        '''
 
         debug_messages = [
-            {"role": "system", "content": "You are a AI coding assistant. That debugs and fixes code."},
+            {"role": "system", "content": "You are a AI coding assistant. That debugs and fixes code. Make sure to explain every error and mistake in the code that you find and fix."},
             # {"role": "user", "content": f"" },
         ]
 
@@ -213,8 +231,42 @@ class CodeDebuggerShell(cmd.Cmd):
         print()
 
     def do_feature(self, line):
-        '''Request a feature for your project from GPT'''
-        pass
+        '''Request a feature for your project from GPT. Describe the required feature as an argument.
+
+        Usage: 
+        feature <feature description> -> Describe the required feature as an argument.
+        '''
+
+        debug_messages = [
+            {"role": "system", "content": "You are a AI coding assistant. Upon request you imporove code, create features and refactor code."},
+            # {"role": "user", "content": f"" },
+        ]
+
+        if self.project_framework:
+            new_message = {"role": "user", "content": f"This is a {self.project_type} project, the project uses {self.project_language} and {self.project_framework} framework."}
+            debug_messages.append(new_message)
+        else:
+            new_message = {"role": "user", "content": f"This is a {self.project_type} project, the project uses {self.project_language}."}
+            debug_messages.append(new_message)
+
+        codebase_message = [
+            {"role": "user", "content": "Here is the relevant codebase:"},]
+
+        for file in self.files_and_content:
+            for path, content in file.items():
+                message = {"role": "user", "content": f"File: {path} Content: {content}"}
+                codebase_message.append(message)
+        
+        error_message = {"role": "user", "content": f"Programmer's Request: {line}" }
+        codebase_message.append(error_message)
+
+        for message in codebase_message:
+            debug_messages.append(message)
+
+        for completion in self.client.get_completion(list(debug_messages), model=self.openai_model, temperature=self.openai_model_temperature):
+            print(completion, end='')
+        print()
+
 
 
 if __name__ == "__main__":
