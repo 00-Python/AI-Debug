@@ -1,7 +1,7 @@
 import sys
 import os
 from PyQt5.QtWidgets import QApplication, QWidget, QTreeView, QVBoxLayout, QPushButton, QLabel, QFileSystemModel
-from PyQt5.QtCore import Qt
+from PyQt5.QtCore import Qt, QEvent
 
 class DirectoryBrowser(QWidget):
     def __init__(self, title):
@@ -30,7 +30,11 @@ class DirectoryBrowser(QWidget):
         self.layout.addWidget(self.select_button)
 
         self.setLayout(self.layout)
-        
+
+        self.tree_view.setColumnWidth(0, 300)  # Adjust column width for filename column
+
+        self.tree_view.installEventFilter(self)  # Install event filter
+
     def get_selected_items(self):
         selected_indexes = self.tree_view.selectionModel().selectedIndexes()
         selected_items = [self.model.filePath(index) for index in selected_indexes]
@@ -39,8 +43,23 @@ class DirectoryBrowser(QWidget):
         recursive_selected_items = self.recursive_selection(selected_items)
 
         self.selected_items = list(set(recursive_selected_items))  # Filter out duplicates
-        # self.selected_items_label.setText("Selected items:\n" + "\n".join(self.selected_items))
         self.close()  # Close the GUI
+
+    def eventFilter(self, obj, event):
+        if obj is self.tree_view and event.type() == QEvent.KeyPress:
+            if event.key() in (Qt.Key_Enter, Qt.Key_Return):
+                self.get_selected_items()
+        return super().eventFilter(obj, event)
+
+    def mouseDoubleClickEvent(self, event):
+        if event.button() == Qt.LeftButton:
+            index = self.tree_view.currentIndex()
+            if index.isValid():
+                path = self.model.filePath(index)
+                if os.path.isdir(path):
+                    self.tree_view.setExpanded(index, not self.tree_view.isExpanded(index))
+                else:
+                    self.get_selected_items()
 
     def recursive_selection(self, paths):
         selected_items = []
