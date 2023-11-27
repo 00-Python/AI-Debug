@@ -153,6 +153,15 @@ class CodeDebuggerShell(cmd.Cmd):
             else:
                 print('Wrong Choice.')
 
+    def complete_project(self, text, line, begidx, endidx):
+        """Tab complete for 'project' subcommands."""
+        subcommands = ['select', 'deselect', 'run', 'files']
+        if not text:
+            completions = subcommands[:]
+        else:
+            completions = [command for command in subcommands if command.startswith(text)]
+        return completions
+
     @error_handler
     def do_config(self, line):
         '''Configure project and OpenAI specifics. Available subcommands include:
@@ -193,6 +202,15 @@ class CodeDebuggerShell(cmd.Cmd):
                 print("Invalid Command!")
         else:
             print("Invalid Command!")
+    
+    def complete_config(self, text, line, begidx, endidx):
+        subcommands = ['project', 'openai']
+        if line.startswith('config project'):
+            subcommands = ['language', 'type', 'framework', 'run']
+        elif line.startswith('config openai'):
+            subcommands = ['model', 'temperature']
+        completions = [command for command in subcommands if command.startswith(text)]
+        return completions
 
     @error_handler
     def do_debug(self, line):
@@ -306,7 +324,7 @@ class CodeDebuggerShell(cmd.Cmd):
 
 if __name__ == "__main__":
     prompt = CodeDebuggerShell()
-    # readline.parse_and_bind("tab: complete")
+    readline.parse_and_bind("tab: complete")
 
     prompt.prompt = f'{Fore.GREEN}AIDebug{Fore.RESET} {Fore.YELLOW}> {Fore.RESET}'
     prompt.cmdloop(f'''{Fore.BLUE}
