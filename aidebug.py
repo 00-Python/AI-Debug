@@ -311,7 +311,7 @@ class CodeDebuggerShell(cmd.Cmd):
             feature_messages.append(new_message)
 
         codebase_message = [
-            {"role": "user", "content": "Here is the relevant codebase, if there are any new features you should add them to the readme:"},]
+            {"role": "user", "content": "Here is the relevant codebase, if there are any new features you should add them to the current README.md:"},]
 
         for file in self.files_and_content:
             for path, content in file.items():
