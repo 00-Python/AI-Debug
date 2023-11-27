@@ -65,6 +65,18 @@ Here is a brief explanation of the commands available in the AIDebug Console:
 
 Remember to replace `<directory>`, `<language>`, `<command>`, `<model>`, `<temperature>`, `<error>`, `<feature_request>`, and `<optional_message>` with your actual values.
 
+## Running System Commands
+
+AIDebug Console allows you to run native system commands directly from the shell. Simply input the desired command, and it will be executed in the console.
+
+For example, to list the files in the current directory, you can use the command `ls`:
+
+```
+> ls
+```
+
+This feature provides flexibility and convenience for running various system tasks alongside your project debugging and development.
+
 ## Credits
 
 This project has borrowed code from [TheR1D's shell_gpt project](https://github.com/TheR1D/shell_gpt/blob/main/sgpt/client.py). I would like to express my gratitude for the contribution to the open-source community which has greatly aided the development of this project.
