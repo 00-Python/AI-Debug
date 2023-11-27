@@ -52,7 +52,8 @@ Here is a brief explanation of the commands available in the AIDebug Console:
 - `project select`: Select project files and directories.
 - `project deselect`: Unselect files and directories by id.
 - `project run`: Run the project.
-- `project files`: Display the selected project files.
+- `project files paths`: Prints selected files paths.
+- `project files contents`: Prints selected files path and contents.
 - `config project language <language>`: Set the programming language of your project.
 - `config project type`: Set the type of your project.
 - `config project framework`: Set the framework that your project is using.
