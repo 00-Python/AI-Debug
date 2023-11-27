@@ -6,12 +6,22 @@ import sys
 import readline
 import subprocess
 
+from PyQt5.QtWidgets import QApplication
+
 from colorama import Fore, Back, Style, init
+from prompt_toolkit.shortcuts import prompt
+from prompt_toolkit.lexers import PygmentsLexer
+from prompt_toolkit.styles import Style as PromptStyle
+
+from pygments import lexers
+from pygments import highlight
+from pygments.lexers import get_lexer_for_filename
+from pygments.formatters import TerminalFormatter
+
 from aidebug.gui.select_dirs import DirectoryBrowser
 from aidebug.utils.files_data import scrape_contents
 from aidebug.utils.error_handler import error_handler
 from aidebug.clientv2.clientv2 import OpenAIClient
-from PyQt5.QtWidgets import QApplication
 
 
 class CodeDebuggerShell(cmd.Cmd):
@@ -36,6 +46,14 @@ class CodeDebuggerShell(cmd.Cmd):
         self.openai_model: str = "gpt-3.5-turbo-16k"
         self.openai_model_temperature: float = 1
         self.messages = list()
+
+    @error_handler
+    def do_update_codebase(self, line):
+        for file_info in self.files_and_content:
+            for path, _ in file_info.items():
+                with open(path, 'r') as file:
+                    content = file.read()
+                file_info[path] = content
     
     @error_handler
     def preloop(self):
@@ -88,7 +106,8 @@ class CodeDebuggerShell(cmd.Cmd):
         project select -> Launches directory browser to select files.
         project deselect -> Launches directory browser to deselect files.
         project run -> Runs the project using configured run command.
-        project files -> Prompts user to decide between displaying file paths or file contents.
+        project files paths -> Prints selected files paths.
+        project files contents -> Prints selected files path and contents.
         '''
 
         line = line.lower().split()
@@ -147,12 +166,17 @@ class CodeDebuggerShell(cmd.Cmd):
                 print(f"An error occurred: {e}")
 
         elif line[0] == 'files':
-            answer = int(
-                input('1. Paths\n2. Paths and Content\n\n Select 1 or 2: '))
-            if answer == 1:
-                print(self.files)
-            elif answer == 2:
-                print(self.files_and_content)
+            if line[1] == 'paths':
+                for indx, file in enumerate(self.files):
+                    print(f'{indx+1}. {file}')
+                print()
+            elif line[1] == 'content':
+                print("File Contents:\n")
+                for file_dict in self.files_and_content:
+                    for path, content in file_dict.items():
+                        print(f"{Fore.RED}{path}{Fore.RESET}:\n")
+                        self.highlight_code(path, content)
+                        print()
             else:
                 print('Wrong Choice.')
 
@@ -330,6 +354,13 @@ class CodeDebuggerShell(cmd.Cmd):
         for completion in self.client.get_completion(list(feature_messages), model=self.openai_model, temperature=self.openai_model_temperature):
             print(completion, end='')
         print()
+
+    def highlight_code(self, path, code):
+
+        lexer =  get_lexer_for_filename(path, stripall=True)
+        formatter = TerminalFormatter()
+        highlighted_code = highlight(code, lexer, formatter)
+        print(highlighted_code)
 
 
 if __name__ == "__main__":
