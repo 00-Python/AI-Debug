@@ -1,10 +1,6 @@
 # AIDebug Console
 
-
-
-https://github.com/00-Python/AI-Debug/assets/8343312/c8425e57-f1b4-499e-a838-d5d3aa4ba12d
-
-
+![AIDebug Console](https://github.com/00-Python/AI-Debug/assets/8343312/c8425e57-f1b4-499e-a838-d5d3aa4ba12d)
 
 AIDebug Console is a Python-based command line application that leverages the power of OpenAI's GPT models to assist with debugging and developing software projects. It provides a user-friendly interface for interacting with your codebase, running your project, and even debugging your code with the help of AI.
 
@@ -12,9 +8,10 @@ AIDebug Console is a Python-based command line application that leverages the po
 
 - **Project Management**: Select and deselect project files and directories.
 - **Project Configuration**: Configure specific project details such as language, type, framework, and run command.
-- **Code Execution**: Run your project directly from the console.
+- **Code Execution**: Run your project directly from the console. (Automatically catches errors and asks user if they want to debug)
 - **AI Debugging**: Debug your project with the help of OpenAI's GPT Models.
 - **AI Feature Request**: Request a feature for your project from OpenAI's GPT Models.
+- **AI Code Documentation**: Get a README.md file for your project's GitHub repository.
 
 ## Installation
 
@@ -64,8 +61,9 @@ Here is a brief explanation of the commands available in the AIDebug Console:
 - `config openai temperature <temperature>`: Set the OpenAI model's temperature.
 - `debug <error>`: Debug your project with the help of OpenAI's GPT Models.
 - `feature <feature_request>`: Request a feature for your project from OpenAI's GPT Models.
+- `readme <optional_message>`: Request a README.md file for your project's GitHub repository from OpenAI's GPT Models.
 
-Remember to replace `<directory>`, `<language>`, `<command>`, `<model>`, `<temperature>`, `<error>`, and `<feature_request>` with your actual values.
+Remember to replace `<directory>`, `<language>`, `<command>`, `<model>`, `<temperature>`, `<error>`, `<feature_request>`, and `<optional_message>` with your actual values.
 
 ## Credits
 
@@ -77,4 +75,4 @@ Pull requests are welcome. For major changes, please open an issue first to disc
 
 ## License
 
-[GNU v3  GPL-3.0](https://choosealicense.com/licenses/mit/)
+This project is licensed under the GNU v3 GPL-3.0 License. See the [LICENSE](LICENSE) file for details.
