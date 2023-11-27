@@ -49,6 +49,11 @@ class CodeDebuggerShell(cmd.Cmd):
 
     @error_handler
     def do_update_codebase(self, line):
+        """Update the contents of the selected project files.
+        
+        This command reads the contents of each selected file and updates the stored contents.
+        The updated contents can be accessed using the 'project files contents' command.
+        """
         for file_info in self.files_and_content:
             for path, _ in file_info.items():
                 with open(path, 'r') as file:
@@ -184,11 +189,11 @@ class CodeDebuggerShell(cmd.Cmd):
     def complete_project(self, text, line, begidx, endidx):
         """Tab complete for 'project' subcommands."""
         subcommands = ['select', 'deselect', 'run', 'files']
-        if not text:
-            completions = subcommands[:]
-        else:
-            completions = [command for command in subcommands if command.startswith(text)]
+        if line.startswith('project files'):
+            subcommands = ['paths', 'contents']
+        completions = [command for command in subcommands if command.startswith(text)]
         return completions
+
 
     @error_handler
     def do_config(self, line):
