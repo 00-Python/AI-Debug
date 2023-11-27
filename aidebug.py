@@ -36,7 +36,8 @@ class CodeDebuggerShell(cmd.Cmd):
         self.openai_model: str = "gpt-3.5-turbo-16k"
         self.openai_model_temperature: float = 1
         self.messages = list()
-
+    
+    @error_handler
     def preloop(self):
         # Check if a virtual environment is active
         venv_path = os.environ.get("VIRTUAL_ENV")
@@ -47,7 +48,8 @@ class CodeDebuggerShell(cmd.Cmd):
             # TODO - Handle errors here!
             os.system(f"source '{self.venv_path}/bin/activate'")
             self.prompt = f"{Fore.GREEN}AIDebug {Fore.RESET}{Fore.RED}@ {Fore.RESET}{Fore.GREEN}({self.venv_name}) {Fore.RESET}{Fore.YELLOW}> {Fore.RESET}"
-
+    
+    @error_handler
     def default(self, line):
         # Split the command into arguments
         command = line.split()
@@ -68,6 +70,7 @@ class CodeDebuggerShell(cmd.Cmd):
                 for stderr_line in iter(process.stderr.readline, ""):
                     print(stderr_line, end="")
 
+    @error_handler
     def do_exit(self, _):
         '''Exit AIDebug Console'''
         return True
@@ -153,6 +156,7 @@ class CodeDebuggerShell(cmd.Cmd):
             else:
                 print('Wrong Choice.')
 
+    @error_handler
     def complete_project(self, text, line, begidx, endidx):
         """Tab complete for 'project' subcommands."""
         subcommands = ['select', 'deselect', 'run', 'files']
@@ -203,6 +207,7 @@ class CodeDebuggerShell(cmd.Cmd):
         else:
             print("Invalid Command!")
     
+    @error_handler
     def complete_config(self, text, line, begidx, endidx):
         subcommands = ['project', 'openai']
         if line.startswith('config project'):
