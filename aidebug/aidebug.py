@@ -373,8 +373,8 @@ def main():
     prompt.prompt = f'{Fore.GREEN}AIDebug{Fore.RESET} {Fore.YELLOW}> {Fore.RESET}'
     prompt.cmdloop(f'''{Fore.BLUE}
 
-    █████████   █████    ██████████            █████                        
-    ███░░░░░███ ░░███    ░░███░░░░███          ░░███                         
+      █████████   █████    ██████████            █████                        
+     ███░░░░░███ ░░███    ░░███░░░░███          ░░███                         
     ░███    ░███  ░███     ░███   ░░███  ██████  ░███████  █████ ████  ███████
     ░███████████  ░███     ░███    ░███ ███░░███ ░███░░███░░███ ░███  ███░░███
     ░███░░░░░███  ░███     ░███    ░███░███████  ░███ ░███ ░███ ░███ ░███ ░███
@@ -382,8 +382,8 @@ def main():
     █████   █████ █████    ██████████  ░░██████  ████████  ░░████████░░███████
     ░░░░░   ░░░░░ ░░░░░    ░░░░░░░░░░    ░░░░░░  ░░░░░░░░    ░░░░░░░░  ░░░░░███
     ___________________________________________________________________███ ░███___
-                                                                    ░░██████{Fore.RESET}
-    {Fore.CYAN}By J. Webster-Colby\nGithub: https://github.com/00-Python{Fore.RESET}
+                                                                       ░░██████{Fore.RESET}
+    {Fore.CYAN}By J. Webster-Colby\n    Github: https://github.com/00-Python{Fore.RESET}
 
     Type {Fore.RED}help{Fore.RESET} for a list of commands.
     ''')
