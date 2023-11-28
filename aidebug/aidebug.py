@@ -6,7 +6,7 @@ import subprocess
 
 import platform
 if platform.system() == 'Windows':
-    import pyreadline
+    import pyreadline as readline
 else:
     import readline
 
