@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 import re
 import os
 import cmd
@@ -18,10 +17,10 @@ from pygments import highlight
 from pygments.lexers import get_lexer_for_filename
 from pygments.formatters import TerminalFormatter
 
-from aidebug.gui.select_dirs import DirectoryBrowser
-from aidebug.utils.files_data import scrape_contents
-from aidebug.utils.error_handler import error_handler
-from aidebug.clientv2.clientv2 import OpenAIClient
+from .core.gui.select_dirs import DirectoryBrowser
+from .core.utils.files_data import scrape_contents
+from .core.utils.error_handler import error_handler
+from .core.clientv2.clientv2 import OpenAIClient
 
 
 class CodeDebuggerShell(cmd.Cmd):
@@ -367,25 +366,27 @@ class CodeDebuggerShell(cmd.Cmd):
         highlighted_code = highlight(code, lexer, formatter)
         print(highlighted_code)
 
-
-if __name__ == "__main__":
+def main():
     prompt = CodeDebuggerShell()
     readline.parse_and_bind("tab: complete")
 
     prompt.prompt = f'{Fore.GREEN}AIDebug{Fore.RESET} {Fore.YELLOW}> {Fore.RESET}'
     prompt.cmdloop(f'''{Fore.BLUE}
 
-   █████████   █████    ██████████            █████                        
-  ███░░░░░███ ░░███    ░░███░░░░███          ░░███                         
- ░███    ░███  ░███     ░███   ░░███  ██████  ░███████  █████ ████  ███████
- ░███████████  ░███     ░███    ░███ ███░░███ ░███░░███░░███ ░███  ███░░███
- ░███░░░░░███  ░███     ░███    ░███░███████  ░███ ░███ ░███ ░███ ░███ ░███
- ░███    ░███  ░███     ░███    ███ ░███░░░   ░███ ░███ ░███ ░███ ░███ ░███
- █████   █████ █████    ██████████  ░░██████  ████████  ░░████████░░███████
-░░░░░   ░░░░░ ░░░░░    ░░░░░░░░░░    ░░░░░░  ░░░░░░░░    ░░░░░░░░  ░░░░░███
-___________________________________________________________________███ ░███___
-                                                                  ░░██████{Fore.RESET}
-{Fore.CYAN}By J. Webster-Colby\nGithub: https://github.com/00-Python{Fore.RESET}
+    █████████   █████    ██████████            █████                        
+    ███░░░░░███ ░░███    ░░███░░░░███          ░░███                         
+    ░███    ░███  ░███     ░███   ░░███  ██████  ░███████  █████ ████  ███████
+    ░███████████  ░███     ░███    ░███ ███░░███ ░███░░███░░███ ░███  ███░░███
+    ░███░░░░░███  ░███     ░███    ░███░███████  ░███ ░███ ░███ ░███ ░███ ░███
+    ░███    ░███  ░███     ░███    ███ ░███░░░   ░███ ░███ ░███ ░███ ░███ ░███
+    █████   █████ █████    ██████████  ░░██████  ████████  ░░████████░░███████
+    ░░░░░   ░░░░░ ░░░░░    ░░░░░░░░░░    ░░░░░░  ░░░░░░░░    ░░░░░░░░  ░░░░░███
+    ___________________________________________________________________███ ░███___
+                                                                    ░░██████{Fore.RESET}
+    {Fore.CYAN}By J. Webster-Colby\nGithub: https://github.com/00-Python{Fore.RESET}
 
-Type {Fore.RED}help{Fore.RESET} for a list of commands.
-''')
+    Type {Fore.RED}help{Fore.RESET} for a list of commands.
+    ''')
+
+if __name__ == '__main__':
+    main()
