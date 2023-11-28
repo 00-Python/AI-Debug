@@ -368,7 +368,7 @@ class CodeDebuggerShell(cmd.Cmd):
 
 def main():
     prompt = CodeDebuggerShell()
-    readline.parse_and_bind("tab: complete")
+    readline.parse_and_bind("tab")
 
     prompt.prompt = f'{Fore.GREEN}AIDebug{Fore.RESET} {Fore.YELLOW}> {Fore.RESET}'
     prompt.cmdloop(f'''{Fore.BLUE}
