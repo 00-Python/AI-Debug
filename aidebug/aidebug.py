@@ -6,7 +6,7 @@ import subprocess
 
 import platform
 if platform.system() == 'Windows':
-    import pyreadline as readline
+    import pyreadline
 else:
     import readline
 
@@ -373,7 +373,11 @@ class CodeDebuggerShell(cmd.Cmd):
 
 def main():
     prompt = CodeDebuggerShell()
-    readline.parse_and_bind("tab")
+
+    if platform.system() == 'Windows':
+        pyreadline.Readline.parse_and_bind("tab: complete")
+    else:
+        readline.parse_and_bind("tab: complete")
 
     prompt.prompt = f'{Fore.GREEN}AIDebug{Fore.RESET} {Fore.YELLOW}> {Fore.RESET}'
     prompt.cmdloop(f'''{Fore.BLUE}
