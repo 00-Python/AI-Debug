@@ -1,7 +1,4 @@
 # AIDebug Console
-
-https://github.com/00-Python/AI-Debug/assets/8343312/c8425e57-f1b4-499e-a838-d5d3aa4ba12d
-
 ![Alt Text](./images/AIDebug_Help_Menus.png)
 
 AIDebug Console is a Python-based command line application that leverages the power of OpenAI's GPT models to assist with debugging and developing software projects. It provides a user-friendly interface for interacting with your codebase, running your project, and even debugging your code with the help of AI.
