@@ -2,8 +2,13 @@ import re
 import os
 import cmd
 import sys
-import readline
 import subprocess
+
+import platform
+if platform.system() == 'Windows':
+    import pyreadline
+else:
+    import readline
 
 from PyQt5.QtWidgets import QApplication
 
