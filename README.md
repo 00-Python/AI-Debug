@@ -17,29 +17,52 @@ AIDebug Console is a Python-based command line application that leverages the po
 
 ## Installation
 
+### Install With Pip
+
+```bash
+pip install aidebug
+```
+
+### Manual Build and Install
+
 1. Clone the repository to your local machine.
 2. Navigate to the project directory.
 3. Install the required Python packages using pip:
 
 ```bash
-pip install -r requirements.txt
+pip install setuptools wheel
+```
+4. Build the project with setup.py:
+
+```bash
+python setup.py sdist bdist_wheel
+```
+5. Change directory to the built project:
+
+```bash
+cd dist
+```
+6. Install the built .whl file with pip:
+
+```bash
+pip install aidebug-0.0.8-py3-none-any.whl
 ```
 
-4. Set the necessary environment variables. You need to provide your OpenAI API key:
+
+## Usage
+1. Set the necessary environment variables. You need to provide your OpenAI API key:
 
 ```bash
 export OPENAI_API_KEY=your_openai_api_key
 ```
 
-## Usage
-
-1. Run the script:
+2. Run the project:
 
 ```bash
-python aidebug.py
+aidebug
 ```
 
-2. Use the `help` command to see a list of available commands.
+3. Use the `help` command to see a list of available commands.
 
 ## Environment Variables
 
