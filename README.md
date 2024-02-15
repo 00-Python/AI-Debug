@@ -1,4 +1,8 @@
 # AIDebug Console
+[![Downloads](https://static.pepy.tech/badge/aidebug)](https://pepy.tech/project/aidebug)
+[![Downloads](https://static.pepy.tech/badge/aidebug/month)](https://pepy.tech/project/aidebug)
+[![Downloads](https://static.pepy.tech/badge/aidebug/week)](https://pepy.tech/project/aidebug)
+
 ![Alt Text](./images/AIDebug_Help_Menus.png)
 
 AIDebug Console is a Python-based command line application that leverages the power of OpenAI's GPT models to assist with debugging and developing software projects. It provides a user-friendly interface for interacting with your codebase, running your project, and even debugging your code with the help of AI.
