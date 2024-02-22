@@ -4,7 +4,7 @@ import os
 def scrape_contents(files):
     files_and_content = list()
     for file in files:
-        if file.endswith(('.py', '.md', '.html', '.css', 'scss', 'java', 'xml', 'c', 'cpp', 'h', 'lock', 'toml', 'rs', 'json')) and os.path.isfile(file):
+        if not file.endswith(('.pyc')) and os.path.isfile(file):
             with open(file, 'r', errors='ignore') as f:
                 contents = f.read().strip()
 
