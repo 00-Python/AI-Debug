@@ -21,7 +21,7 @@ setup(
     long_description_content_type="text/markdown",
     long_description=long_description,
     packages=find_packages(),
-    install_requires=['PyQt5', 'colorama', 'requests', 'urllib3', 'idna', 'prompt_toolkit', 'pygments', 'pyreadline'],
+    install_requires=['PyQt5', 'colorama', 'requests', 'urllib3', 'idna', 'prompt_toolkit', 'pygments', 'pyreadline', 'gpt4all'],
     keywords=['aidebug', 'ai debug', 'ai debugging', 'debug with AI', 'Code with ai', 'ai programming', 'python', 'AI', 'Coding Assistant', 'AI Coding', 'OpenAI', 'GPT-4', 'GPT'],
     classifiers=[
         "Intended Audience :: Developers",
