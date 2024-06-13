@@ -1,10 +1,11 @@
 import sys
 import os
-from PyQt5.QtWidgets import QApplication, QWidget, QTreeView, QVBoxLayout, QPushButton, QLabel, QFileSystemModel
+from typing import List
+from PyQt5.QtWidgets import QApplication, QWidget, QTreeView, QVBoxLayout, QPushButton, QFileSystemModel
 from PyQt5.QtCore import Qt, QEvent
 
 class DirectoryBrowser(QWidget):
-    def __init__(self, title):
+    def __init__(self, title: str) -> None:
         super().__init__()
 
         self.setWindowTitle(title)
@@ -31,27 +32,24 @@ class DirectoryBrowser(QWidget):
 
         self.setLayout(self.layout)
 
-        self.tree_view.setColumnWidth(0, 300)  # Adjust column width for filename column
+        self.tree_view.setColumnWidth(0, 300)
 
-        self.tree_view.installEventFilter(self)  # Install event filter
+        self.tree_view.installEventFilter(self)
 
-    def get_selected_items(self):
+    def get_selected_items(self) -> None:
         selected_indexes = self.tree_view.selectionModel().selectedIndexes()
-        selected_items = [self.model.filePath(index) for index in selected_indexes]
+        selected_items = {self.model.filePath(index) for index in selected_indexes}
 
-        # Recursively add subfiles and subdirectories
-        recursive_selected_items = self.recursive_selection(selected_items)
+        self.selected_items = self.recursive_selection(selected_items)
+        self.close()
 
-        self.selected_items = list(set(recursive_selected_items))  # Filter out duplicates
-        self.close()  # Close the GUI
-
-    def eventFilter(self, obj, event):
+    def eventFilter(self, obj, event) -> bool:
         if obj is self.tree_view and event.type() == QEvent.KeyPress:
             if event.key() in (Qt.Key_Enter, Qt.Key_Return):
                 self.get_selected_items()
         return super().eventFilter(obj, event)
 
-    def mouseDoubleClickEvent(self, event):
+    def mouseDoubleClickEvent(self, event) -> None:
         if event.button() == Qt.LeftButton:
             index = self.tree_view.currentIndex()
             if index.isValid():
@@ -61,23 +59,21 @@ class DirectoryBrowser(QWidget):
                 else:
                     self.get_selected_items()
 
-    def recursive_selection(self, paths):
+    def recursive_selection(self, paths: set) -> List[str]:
         selected_items = []
         for path in paths:
             if os.path.isdir(path):
                 for root, dirs, files in os.walk(path):
-                    selected_items.extend([os.path.join(root, f) for f in files])
-                    selected_items.extend([os.path.join(root, d) for d in dirs])
+                    selected_items.extend([os.path.join(root, f) for f in files + dirs])
             else:
                 selected_items.append(path)
         return selected_items
 
-def main(tab_name):
+def main(tab_name: str) -> List[str]:
     app = QApplication(sys.argv)
     window = DirectoryBrowser(tab_name)
     window.show()
     app.exec_()
-    # Return selected_items from the DirectoryBrowser instance
     return window.selected_items
 
 if __name__ == "__main__":
