@@ -8,6 +8,8 @@
 AIDebug Console is a Python-based command line application that leverages the power of OpenAI's GPT models to assist with debugging and developing software projects. It provides a user-friendly interface for interacting with your codebase, running your project, and even debugging your code with the help of AI.
 
 ## Features
+!! Now Supports GOOGLE Geminai!! 
+Will soon support Open Source Models
 
 - **Project Management**: Select and deselect project files and directories.
 - **Project Configuration**: Configure specific project details such as language, type, framework, and run command.
@@ -51,10 +53,11 @@ pip install aidebug-0.0.8-py3-none-any.whl
 
 
 ## Usage
-1. Set the necessary environment variables. You need to provide your OpenAI API key:
+1. Set the necessary environment variables. You need to provide your OpenAI API or Google AI API key:
 
 ```bash
 export OPENAI_API_KEY=your_openai_api_key
+export GOOGLE_API_KEY=your_GOOGLE_API_KEY
 ```
 
 2. Run the project:
@@ -63,35 +66,103 @@ export OPENAI_API_KEY=your_openai_api_key
 aidebug
 ```
 
-3. Use the `help` command to see a list of available commands.
+3. **Use the available commands to manage and debug your project:**
 
-## Environment Variables
+- **help**: List all available commands.
+- **update_codebase**: Update the contents of the selected project files.
+- **project**: Perform project related operations (select, deselect, run, files).
+- **config**: Configure project and client specifics.
+- **exit**: Exit the AI-Debug console.
+- **debug**: Debug project with GPT by providing the relevant error message.
+- **feature**: Request a feature for your project from GPT.
+- **readme**: Generate a README.md file for your project.
 
-- `OPENAI_API_HOST`: The API host for OpenAI. Default is `https://api.openai.com`.
-- `OPENAI_API_KEY`: Your OpenAI API key.
+### Commands
 
-# Commands
-Here is a brief explanation of the commands available in the AIDebug Console:
+- **update_codebase**: Reads the contents of each selected file and updates the stored contents.
 
-- `cd <directory>`: Change the current working directory.
-- `exit`: Exit the AIDebug Console.
-- `project select`: Select project files and directories.
-- `project deselect`: Unselect files and directories by id.
-- `project run`: Run the project.
-- `project files paths`: Prints selected files paths.
-- `project files contents`: Prints selected files path and contents.
-- `config project language <language>`: Set the programming language of your project.
-- `config project type`: Set the type of your project.
-- `config project framework`: Set the framework that your project is using.
-- `config project run <command>`: Set the command used to run your project.
-- `config openai model <model>`: Set the OpenAI model to be used.
-- `config openai temperature <temperature>`: Set the OpenAI model's temperature.
-- `debug <error>`: Debug your project with the help of OpenAI's GPT Models.
-- `feature <feature_request>`: Request a feature for your project from OpenAI's GPT Models.
-- `readme <optional_message>`: Request a README.md file for your project's GitHub repository from OpenAI's GPT Models.
+- **project select**: Launches a directory browser to select project files and directories.
 
-Remember to replace `<directory>`, `<language>`, `<command>`, `<model>`, `<temperature>`, `<error>`, `<feature_request>`, and `<optional_message>` with your actual values.
+- **project deselect**: Launches a directory browser to deselect files.
 
+- **project run**: Runs the project using the configured run command.
+
+- **project files paths**: Prints selected file paths.
+
+- **project files contents**: Prints selected file paths and contents.
+
+- **config project language**: Prompts user to input project language.
+
+- **config project type**: Prompts user to describe the type of project.
+
+- **config project framework**: Prompts user to input the framework used in the project.
+
+- **config project run**: Prompts user to input the command to run the project.
+
+- **config openai model**: Sets the OpenAI model.
+
+- **config openai temperature**: Sets model temperature.
+
+- **config client type**: Sets the client type (openai, google, open_source).
+
+- **config client api_key**: Sets the API key for the selected client type (if applicable).
+
+- **debug**: Debug project with GPT. Input the error message as the argument.
+
+- **feature**: Request a feature for your project from GPT. Describe the required feature as an argument.
+
+- **readme**: Generate a README.md file for your project's Github repository.
+
+## Example
+
+Start the AI-Debug shell:
+
+```bash
+python -m aidebug
+```
+
+Select project files:
+
+```sh
+AIDebug > project select
+```
+
+Update codebase:
+
+```sh
+AIDebug > update_codebase
+```
+
+Run the project:
+
+```sh
+AIDebug > project run
+```
+
+Configure project language:
+
+```sh
+AIDebug > config project language
+Enter project language: Python
+```
+
+Debug project:
+
+```sh
+AIDebug > debug <error message>
+```
+
+Request a new feature:
+
+```sh
+AIDebug > feature <feature description>
+```
+
+Generate a README file:
+
+```sh
+AIDebug > readme
+```
 ## Running System Commands
 
 AIDebug Console allows you to run native system commands directly from the shell. Simply input the desired command, and it will be executed in the console.
